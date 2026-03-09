@@ -1,3 +1,7 @@
+if getgenv().PhyLib then
+	return getgenv().PhyLib
+end
+
 local pack = table.pack
 local error = error
 local pcall = pcall
@@ -270,4 +274,5 @@ lib = freeze({
 	end
 })
 
+getgenv().PhyLib = lib
 return lib

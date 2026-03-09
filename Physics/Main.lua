@@ -179,7 +179,7 @@ spooferBase = {
 }
 
 local newSpoofer = function(object)
-	local self = smt({ Properties = { }, OriginalValues = { }, Enabled = true, Object = object })
+	local self = smt({ Properties = { }, OriginalValues = { }, Enabled = true, Object = object }, spooferBase)
 	insert(spoofQueue, self)
 	
 	return self

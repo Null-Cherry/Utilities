@@ -31,7 +31,7 @@ myChannel.Enabled = true -- Enable/disable the channel
 myChannel.Rate = 5 -- Polling rate in seconds (default: 5)
 myChannel.Ping = math.huge -- Current ping/latency (read-only)
 myChannel.ChannelName = "MyChannelName" -- Channel identifier
-myChannel.RecieveOwn = true -- Your will recieve your own messages
+myChannel.RecieveOwn = false -- Your will recieve your own messages
 ```
 
 ## Events

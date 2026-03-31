@@ -1,4 +1,4 @@
-# DataLibrary Documentation
+# Data library Documentation
 
 ## Installation
 Add this library to your Lua environment using the following code:
@@ -7,7 +7,7 @@ local DataLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/N
 ```
 
 ## Overview
-DataLibrary is a cross-server communication library that allows data sharing between users on the same channel, regardless of the Roblox game they're currently in. The library provides a simple event-based system for sending and receiving messages across servers.
+Data library is a cross-server communication library that allows data sharing between users on the same channel, regardless of the Roblox game they're currently in. The library provides a simple event-based system for sending and receiving messages across servers.
 
 ## Core Concepts
 - **Channels**: Communication groups where messages are broadcasted
@@ -31,6 +31,7 @@ myChannel.Enabled = true -- Enable/disable the channel
 myChannel.Rate = 5 -- Polling rate in seconds (default: 5)
 myChannel.Ping = math.huge -- Current ping/latency (read-only)
 myChannel.ChannelName = "MyChannelName" -- Channel identifier
+myChannel.RecieveOwn = true -- Your will recieve your own messages
 ```
 
 ## Events

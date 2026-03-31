@@ -1,4 +1,4 @@
-# Data library Documentation
+# Data library documentation
 
 ## Installation
 Add this library to your Lua environment using the following code:

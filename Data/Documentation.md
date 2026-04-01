@@ -13,6 +13,7 @@ Data library is a cross-server communication library that allows data sharing be
 - **Channels**: Communication groups where messages are broadcasted
 - **Server-wide**: Data is shared across all servers running the same channel
 - **Event-driven**: Uses listeners to handle incoming messages
+- **Player Validation**: Verify player identity across servers
 
 ## Basic Usage
 
@@ -28,10 +29,10 @@ local globalChannel = DataLibrary.new() -- Uses "Global" channel
 ### Channel Properties
 ```lua
 myChannel.Enabled = true -- Enable/disable the channel
-myChannel.Rate = 5 -- Polling rate in seconds (default: 5)
+myChannel.Rate = 1 -- Polling rate in seconds (default: 1)
 myChannel.Ping = math.huge -- Current ping/latency (read-only)
-myChannel.ChannelName = "MyChannelName" -- Channel identifier (overwriting can cause issues)
-myChannel.RecieveOwn = false -- Your will recieve your own messages
+myChannel.ChannelName = "MyChannelName" -- Channel identifier (overwriting can cause issues, so keep it read-only)
+myChannel.RecieveOwn = false -- Whether you will receive your own messages
 ```
 
 ## Events
@@ -39,9 +40,10 @@ myChannel.RecieveOwn = false -- Your will recieve your own messages
 ### OnMessage Event
 Listens for JSON-encoded messages:
 ```lua
-local connection = myChannel.OnMessage:Connect(function(message, sender)
+local connection = myChannel.OnMessage:Connect(function(message, sender, senderId)
     -- message: Decoded JSON data
     -- sender: Player instance (if in same game/server), otherwise nil
+    -- senderId: Encoded player identifier (always available)
     print("Received:", message)
     if sender then
         print("From:", sender.Name)
@@ -52,15 +54,18 @@ end)
 ### OnMessageRaw Event
 Listens for raw (non-JSON) messages:
 ```lua
-local connection = myChannel.OnMessageRaw:Connect(function(rawMessage, sender)
+local connection = myChannel.OnMessageRaw:Connect(function(rawMessage, sender, senderId)
     -- rawMessage: Raw string data
     -- sender: Player instance (if in same game/server), otherwise nil
+    -- senderId: Encoded player identifier (always available)
     print("Raw message:", rawMessage)
 end)
 ```
 
 ### Event Methods
 ```lua
+local event = myChannel.OnMessage
+
 -- Connect a callback function
 local connection = event:Connect(function(data)
     -- Handle event
@@ -86,20 +91,55 @@ connection:Disconnect()
 myChannel:Send({
     type = "chat",
     content = "Hello world!",
-    timestamp = os.time()
+    timestamp = tick()
 })
 
--- Send to specific player (if they're online)
+-- Send to specific player (if they're online), targetPlayer is a Player from "Players" service, e.g. game:GetService("Players")
 myChannel:Send(dataTable, targetPlayer)
 ```
 
 ### Send Raw Data
 ```lua
 -- Send raw string (won't be JSON decoded)
+-- if 3rd argument is true, message won't be json encoded, so it MUST be a string
 myChannel:Send("Raw string message", nil, true)
 
 -- Send raw to specific player
 myChannel:Send("Raw data", targetPlayer, true)
+```
+
+### Asynchronous Sending
+```lua
+-- Send asynchronously with success/failure return
+local success = myChannel:SendAsync(data, targetPlayer, isRaw)
+-- Returns true if sent successfully, false otherwise
+
+-- Unsafe asynchronous send (can fail when rate limited)
+local success = myChannel:SendAsyncUnsafe(data, targetPlayer, isRaw)
+-- Returns immediately with success/failure status
+```
+
+## Player Validation
+
+### Validate Player Identity
+```lua
+-- Verify if a player ID matches their encoded hash
+local isValid = DataLibrary:ValidatePlayer(playerId, encodedHash)
+-- Returns true if the player ID matches the hash, false otherwise
+
+-- Example usage in event handler
+myChannel.OnMessage:Connect(function(message, sender, senderId)
+    if sender then
+        -- Player is in same server
+        print("Local player:", sender.Name)
+    else
+        -- Cross-server player - validate identity
+        local playerId = message.playerId -- Extract from your message format
+        if DataLibrary:ValidatePlayer(playerId, senderId) then
+            print("Validated cross-server player:", playerId)
+        end
+    end
+end)
 ```
 
 ## Important Notes
@@ -107,63 +147,82 @@ myChannel:Send("Raw data", targetPlayer, true)
 ### Player Detection
 - The `sender` parameter in events will be a Player instance **only if** that player is in the same Roblox game and server
 - If the sender is in a different server, `sender` will be `nil`
-- This allows for cross-server communication while maintaining privacy
-
-### Message Processing
-- Messages are automatically JSON encoded/decoded when using `Send()` without the raw flag
-- Raw messages bypass JSON processing
-- Each message has a unique ID to prevent duplicate processing
-
-### Channel Management
-- Channels are cached - creating a channel with the same name returns the existing instance
-- Each channel runs an automatic polling loop to check for new messages
-- The polling rate is controlled by the `Rate` property (in seconds)
+- The `senderId` parameter always contains an encoded player identifier, even for cross-server communication
+- `DataLibrary:ValidatePlayer(userId)` should return `senderId` (where userId is UserId of player who sent the message, obviously)
+- This allows for cross-server communication while maintaining privacy and player identification
 
 ## Example Usage
 
-### Basic Chat System
+### Basic Chat System with Player Validation
 ```lua
 local DataLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Null-Cherry/Utilities/refs/heads/main/Data/Main.lua", true))()
 
 local chatChannel = DataLibrary.new("GlobalChat")
 
 -- Listen for messages
-chatChannel.OnMessage:Connect(function(message, sender)
+chatChannel.OnMessage:Connect(function(message, sender, senderId)
     if sender then
         print(sender.Name .. ": " .. message.content)
     else
-        print("[Cross-server]: " .. message.content)
+        -- Validate cross-server player
+        if DataLibrary:ValidatePlayer(message.authorId, senderId) then
+            print("[Cross-server] " .. message.author .. ": " .. message.content)
+        else
+            print("[Unverified]: " .. message.content)
+        end
     end
 end)
 
--- Send a message
+-- Send a message with author info
 chatChannel:Send({
     content = "Hello from another server!",
-    author = game.Players.LocalPlayer.Name
+    author = game.Players.LocalPlayer.Name, -- bad, you should better get player name using services like UserService or Players
+    authorId = game.Players.LocalPlayer.UserId
 })
 ```
 
-### Cross-Server Notifications
+### Cross-Server Notifications with Async Sending
 ```lua
 local notifyChannel = DataLibrary.new("Notifications")
 
-notifyChannel.OnMessage:Connect(function(notification, sender)
+notifyChannel.OnMessage:Connect(function(notification, sender, senderId)
     if notification.type == "achievement" then
-        print(notification.player .. " unlocked: " .. notification.achievement)
+        if DataLibrary:ValidatePlayer(notification.playerId, senderId) then
+            print(notification.player .. " unlocked: " .. notification.achievement)
+        end
     end
 end)
 
--- Broadcast achievement unlock
-notifyChannel:Send({
+-- Broadcast achievement unlock with guaranteed delivery
+local success = notifyChannel:SendAsync({
     type = "achievement",
     player = game.Players.LocalPlayer.Name,
+    playerId = game.Players.LocalPlayer.UserId,
     achievement = "Master Explorer"
 })
+
+if success then
+    print("Achievement broadcast successfully!")
+end
+```
+
+### Real-time Updates with Faster Polling
+```lua
+local updateChannel = DataLibrary.new("RealTimeUpdates")
+updateChannel.Rate = 0.5 -- Poll every 0.5 seconds for faster updates
+
+updateChannel.OnMessageRaw:Connect(function(rawData, sender, senderId)
+    -- Process raw data for performance-critical applications
+    print("Update received:", rawData)
+end)
 ```
 
 ## Best Practices
 1. Use descriptive channel names to avoid conflicts
 2. Always check if `sender` is `nil` before using player-specific methods
 3. Use JSON encoding for structured data, raw for simple strings
-4. Adjust the `Rate` property based on your needs (higher = less frequent polling)
+4. Adjust the `Rate` property based on your needs (lower = faster polling)
 5. Disable channels when not in use to reduce network traffic
+6. Use `SendAsync()` for guaranteed message delivery when needed
+7. Validate cross-server players using `ValidatePlayer()` for security
+8. Include player IDs in your message format for validation purposes

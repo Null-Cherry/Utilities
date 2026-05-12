@@ -28,7 +28,7 @@ local Event = require(game.ReplicatedStorage.Event) -- Adjust path as needed
 
 ### Create a New Event
 ```lua
-local myEvent = Event() -- Returns a new event instance
+local myEvent = Event() -- or Event.new(); Returns a new event instance
 ```
 
 ### Connect a Callback
@@ -92,20 +92,16 @@ connection:Disconnect() -- Stops the connection from firing again
 
 ```lua
 local Event = require(game.ReplicatedStorage.Event)
-local scoreEvent = Event()
+local scoreEvent = Event() -- or Event.new()
 
--- Listen for score changes
 scoreEvent:Connect(function(player, points)
     print(player.Name .. " gained " .. points .. " points!")
 end)
 
--- Wait for first player to score 100+
 local player, points = scoreEvent:Wait()
 if points >= 100 then
     print(player.Name .. " reached a milestone!")
 end
 
--- Fire events from elsewhere
 scoreEvent:Fire(player, 50)
-scoreEvent:Fire(player, 60) -- This will trigger the milestone wait above
 ```

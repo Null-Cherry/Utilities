@@ -129,10 +129,10 @@ local n = "FESPLib"
 
 local v = global[n]
 if v then
-    ESPObj:Destroy()
-    script:Destroy()
+	ESPObj:Destroy()
+	script:Destroy()
 
-    return v
+	return v
 end
 
 script.Parent, ESPObj.Parent = nil, nil
@@ -165,28 +165,28 @@ local fromPoint = v2(0, 0)
 local maxX, maxY = 0, 0
 
 local function memoize(fn)
-    local cache = setmetatable({ }, { __mode = "k" })
+	local cache = setmetatable({ }, { __mode = "k" })
 
-    return function(...)
-        local args = pack(...)
-        local key = args.n ~= 0 and concat(args, "\0") or ""
+	return function(...)
+		local args = pack(...)
+		local key = args.n ~= 0 and concat(args, "\0") or ""
 
-        local result = cache[key]
-        if result then
-            return unpack(result, 1, result.n)
-        end
+		local result = cache[key]
+		if result then
+			return unpack(result, 1, result.n)
+		end
 
-        result = pack(fn(...))
-        cache[key] = result
+		result = pack(fn(...))
+		cache[key] = result
 
-        return unpack(result, 1, result.n)
-    end
+		return unpack(result, 1, result.n)
+	end
 end
 
 local deg, atan2 = memoize(math.deg), memoize(math.atan2)
 
 local dnew = --drawing and drawing.new or
-    nil
+	nil
 
 local topb = inew("ScreenGui", holder.Parent == workspace and plr:WaitForChild("PlayerGui", 9e9) or holder.Parent)
 topb.Name = "TopbarMeasurer"
@@ -194,56 +194,56 @@ topb.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
 
 local dh = not dnew and inew("ScreenGui", topb.Parent)
 if dh then
-    dh.DisplayOrder = 2147483647
-    dh.ResetOnSpawn = false
-    -- dh.IgnoreGuiInset = true
-    dh.ClipToDeviceSafeArea = false
-    dh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	dh.DisplayOrder = 2147483647
+	dh.ResetOnSpawn = false
+	-- dh.IgnoreGuiInset = true
+	dh.ClipToDeviceSafeArea = false
+	dh.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    pcall(function()
-        dh.OnTopOfCoreBlur = true
-    end)
+	pcall(function()
+		dh.OnTopOfCoreBlur = true
+	end)
 end
 
 local newLine = dnew and function()
-    return dnew("Line")
+	return dnew("Line")
 end or function()
-    local line = inew("Frame", dh)
-    line.BorderSizePixel = 0
-    line.Size = u2(0, 1, 0, 1)
-    line.AnchorPoint = v2(0.5, 0.5)
+	local line = inew("Frame", dh)
+	line.BorderSizePixel = 0
+	line.Size = u2(0, 1, 0, 1)
+	line.AnchorPoint = v2(0.5, 0.5)
 
-    return line
+	return line
 end
 
 local updateLine = dnew and function(line, visible, to, color)
-    line.Visible = visible
-    if not visible then return end
+	line.Visible = visible
+	if not visible then return end
 
-    line.From = fromPoint
-    line.To = to
-    line.Color = color
-    line.Thickness = 2
+	line.From = fromPoint
+	line.To = to
+	line.Color = color
+	line.Thickness = 2
 end or function(line, visible, to, color)
-    line.Visible = false
-    if not visible then return end
+	line.Visible = false
+	if not visible then return end
 
-    local direction = (to - fromPoint)
-    local center = (to + fromPoint) / 2
-    line.Position = u2(0, center.X, 0, center.Y)
-    line.Rotation = deg(atan2(direction.Y, direction.X))
-    line.Size =  u2(0, direction.Magnitude, 0, 2)
-    line.BackgroundColor3 = color
-    line.Visible = true
+	local direction = (to - fromPoint)
+	local center = (to + fromPoint) / 2
+	line.Position = u2(0, center.X, 0, center.Y)
+	line.Rotation = deg(atan2(direction.Y, direction.X))
+	line.Size =  u2(0, direction.Magnitude, 0, 2)
+	line.BackgroundColor3 = color
+	line.Visible = true
 end
 
 local refresh
 local onUpdate = function(self, idx, val)
-    rawset(self, idx, val)
+	rawset(self, idx, val)
 
-    for _, v in self.Objects do
-        refresh(v)
-    end
+	for _, v in self.Objects do
+		refresh(v)
+	end
 end
 
 local currentRGBColor = hsv(tick() % 1, 1, 1)
@@ -251,204 +251,205 @@ local currentRGBColor = hsv(tick() % 1, 1, 1)
 onUpdate = { __newindex = onUpdate }
 
 local base = {
-    RGBSpeed = 1,
-    RGB = false,
-    Tracers = false,
-    FromPoint = "Bottom",
-    Performant = false,
-    ClassSettings = setmetatable({ }, {
-        __index = function(self, idx)
-            local tbl = rawget(self, idx)
-            ESPs[idx] = ESPs[idx] or { }
+	RGBSpeed = 1,
+	RGB = false,
+	Tracers = false,
+	FromPoint = "Bottom",
+	Performant = false,
+	ClassSettings = setmetatable({ }, {
+		__index = function(self, idx)
+			local tbl = rawget(self, idx)
+			ESPs[idx] = ESPs[idx] or { }
 
-            if not tbl then
-                tbl = setmetatable({
-                    Tracers = false,
-                    RGB = false,
-                    Objects = ESPs[idx]
-                }, onUpdate)
+			if not tbl then
+				tbl = setmetatable({
+					Tracers = false,
+					RGB = false,
+					Objects = ESPs[idx],
+					Visible = false
+				}, onUpdate)
 
-                rawset(self, idx, tbl)
-            end
+				rawset(self, idx, tbl)
+			end
 
-            return tbl
-        end,
-        __newindex = error
-    })
+			return tbl
+		end,
+		__newindex = error
+	})
 }
 
 local cam = workspace.CurrentCamera
 local f = 50
 
 game:GetService("RunService").RenderStepped:Connect(function()
-    currentRGBColor = hsv((tick() * (base.RGBSpeed / 2)) % 1, 1, 1)
-    cam = workspace.CurrentCamera or cam.Parent == workspace and cam or nil
-    
-    maxX = (cam and cam.ViewportSize.X or topb.AbsoluteSize.X) + f
-    maxY = (cam and cam.ViewportSize.Y or 0) + f
+	currentRGBColor = hsv((tick() * (base.RGBSpeed / 2)) % 1, 1, 1)
+	cam = workspace.CurrentCamera or cam.Parent == workspace and cam or nil
+	
+	maxX = (cam and cam.ViewportSize.X or topb.AbsoluteSize.X) + f
+	maxY = (cam and cam.ViewportSize.Y or 0) + f
 
-    if base.FromPoint == "Bottom" then
-        fromPoint = cam and v2(cam.ViewportSize.X / 2, cam.ViewportSize.Y) or v2(0, 0)
-    elseif typeof(base.FromPoint) == "Vector2" then
-        fromPoint = base.FromPoint
-    else
-        fromPoint = v2(mouse.X, mouse.Y)
-    end
+	if base.FromPoint == "Bottom" then
+		fromPoint = cam and v2(cam.ViewportSize.X / 2, cam.ViewportSize.Y) or v2(0, 0)
+	elseif typeof(base.FromPoint) == "Vector2" then
+		fromPoint = base.FromPoint
+	else
+		fromPoint = v2(mouse.X, mouse.Y)
+	end
 
-    for _, v in ESPs do
-        for _, v2 in v do
-            refresh(v2)
-        end
-    end
+	for _, v in ESPs do
+		for _, v2 in v do
+			refresh(v2)
+		end
+	end
 end)
 
 local espCache = { }
 local function destroy(self)
-    self = self.Self or self
+	self = self.Self or self
 
-    ESPs[self.Settings.Class][self.Object] = nil
-    self.ESP:Destroy()
-    self.Line:Destroy()
-    espCache[self.Object] = nil
+	ESPs[self.Settings.Class][self.Object] = nil
+	self.ESP:Destroy()
+	self.Line:Destroy()
+	espCache[self.Object] = nil
 
-    for i in self do
-        rawset(self, i, nil)
-    end
+	for i in self do
+		rawset(self, i, nil)
+	end
 end
 
 local function getVector2(pos)
-    if not cam then return nil end
-    
-    local v3 = cam:WorldToViewportPoint(pos)
-    if v3.Z < 0 or base.Performant and (v3.X < -f or v3.X > maxX or v3.Y < -f or v3.Y > maxY) then return nil end
-    
-    return v2(v3.X, v3.Y - topb.AbsoluteSize.Y)
+	if not cam then return nil end
+	
+	local v3 = cam:WorldToViewportPoint(pos)
+	if v3.Z < 0 or base.Performant and (v3.X < -f or v3.X > maxX or v3.Y < -f or v3.Y > maxY) then return nil end
+	
+	return v2(v3.X, v3.Y - topb.AbsoluteSize.Y)
 end
 
 local getPosition; getPosition = function(obj)
-    if obj:IsA("Folder") then
-        local pos = v3()
-        local total = 0
-        
-        for _, v in obj:GetChildren() do
-            if v:IsA("Model") or v:IsA("BasePart") then
-                pos += getPosition(v)
-                total += 1
-            end
-        end
-        
-        return pos / total
-    end
-    
-    return obj:GetPivot(obj).Position
+	if obj:IsA("Folder") then
+		local pos = v3()
+		local total = 0
+		
+		for _, v in obj:GetChildren() do
+			if v:IsA("Model") or v:IsA("BasePart") then
+				pos += getPosition(v)
+				total += 1
+			end
+		end
+		
+		return pos / total
+	end
+	
+	return obj:GetPivot(obj).Position
 end
 
 refresh = function(self)
-    self = self.Self or self
+	self = self.Self or self
 
-    local esp = self.ESP
-    local settings = self.Settings
-    local obj = self.Object
-    local line = self.Line
+	local esp = self.ESP
+	local settings = self.Settings
+	local obj = self.Object
+	local line = self.Line
 
-    local highlight = esp.Highlight
+	local highlight = esp.Highlight
 
-    local pos = getPosition(obj)
-    local vec = getVector2(pos)
-    
-    local visible = vec and settings.Visible
+	local pos = getPosition(obj)
+	local vec = getVector2(pos)
+	
+	local visible = vec and settings.Visible and base.ClassSettings[settings.Class].Visible
 
-    esp.Enabled = visible
-    highlight.Enabled = visible and settings.Highlight
+	esp.Enabled = visible
+	highlight.Enabled = visible and settings.Highlight
 
-    if not visible then
-        return updateLine(line, false)
-    end
+	if not visible then
+		return updateLine(line, false)
+	end
 
-    local text = esp.TextLabel
-    local topText = esp.TopTextLabel
+	local text = esp.TextLabel
+	local topText = esp.TopTextLabel
 
-    local color = (settings.RGB or base.RGB or base.ClassSettings[settings.Class].RGB) and currentRGBColor or settings.Color
+	local color = (settings.RGB or base.RGB or base.ClassSettings[settings.Class].RGB) and currentRGBColor or settings.Color
 
-    esp.Circle.BackgroundColor3 = color
-    esp.StudsOffsetWorldSpace = pos
+	esp.Circle.BackgroundColor3 = color
+	esp.StudsOffsetWorldSpace = pos
 
-    highlight.FillColor = color
-    highlight.OutlineColor = color
-    highlight.Adornee = typeof(settings.HighlightAdornee) == "Instance" and settings.HighlightAdornee or obj
-    highlight.Enabled = settings.Highlight
+	highlight.FillColor = color
+	highlight.OutlineColor = color
+	highlight.Adornee = typeof(settings.HighlightAdornee) == "Instance" and settings.HighlightAdornee or obj
+	highlight.Enabled = settings.Highlight
 
-    text.Text = settings.Text
-    text.TextColor3 = color
+	text.Text = settings.Text
+	text.TextColor3 = color
 
-    topText.Text = settings.TopText
-    topText.TextColor3 = color
+	topText.Text = settings.TopText
+	topText.TextColor3 = color
 
-    local tracerEnabled = settings.Tracer or base.Tracers and base[settings.Class].Tracers
-    if not tracerEnabled then
-        return updateLine(line, false)
-    end
-    
-    updateLine(line, true, vec, color)
+	local tracerEnabled = settings.Tracer or base.Tracers and base[settings.Class].Tracers
+	if not tracerEnabled then
+		return updateLine(line, false)
+	end
+	
+	updateLine(line, true, vec, color)
 end
 
 local ESPBaseSettings = {
-    Highlight = true,
-    HighlightAdornee = false,
-    Tracer = true,
-    Text = "",
-    TopText = "",
-    Visible = true,
-    RGB = false,
-    Color = Color3.new(1, 1, 1),
-    Class = "_Default",
+	Highlight = true,
+	HighlightAdornee = false,
+	Tracer = true,
+	Text = "",
+	TopText = "",
+	Visible = true,
+	RGB = false,
+	Color = Color3.new(1, 1, 1),
+	Class = "_Default",
 
-    Refresh = refresh,
-    Destroy = destroy
+	Refresh = refresh,
+	Destroy = destroy
 }
 
 ESPBaseSettings = { __index = ESPBaseSettings }
 
 local objectBase = { __index = function(self, idx)
-    return rawget(rawget(self, "Settings"), idx) or rawget(self, idx)
+	return rawget(rawget(self, "Settings"), idx) or rawget(self, idx)
 end, __newindex = function(self, idx, val)
-    rawset(rawget(self, "Settings"), idx, val)
-    refresh(self)
+	rawset(rawget(self, "Settings"), idx, val)
+	refresh(self)
 end }
 
 local function newObject(object, settings, class)
-    settings = setmetatable(settings or { }, ESPBaseSettings)
-    if class then
-        rawset(settings, "Class", class)
-    end
+	settings = setmetatable(settings or { }, ESPBaseSettings)
+	if class then
+		rawset(settings, "Class", class)
+	end
 
-    rawset(settings, "Settings", settings)
+	rawset(settings, "Settings", settings)
 
-    local v = espCache[object]
-    if v then
-        ESPs[v.Settings.Class][object] = nil
-        ESPs[settings.Class][object] = v
-        rawset(v, "Settings", settings)
+	local v = espCache[object]
+	if v then
+		ESPs[v.Settings.Class][object] = nil
+		ESPs[settings.Class][object] = v
+		rawset(v, "Settings", settings)
 
-        refresh(v)
-        return v
-    end
+		refresh(v)
+		return v
+	end
 
-    local espObj = ESPObj:Clone()
-    espObj.Parent = holder
+	local espObj = ESPObj:Clone()
+	espObj.Parent = holder
 
-    local tracerLine = newLine()
-    updateLine(tracerLine, false)
+	local tracerLine = newLine()
+	updateLine(tracerLine, false)
 
-    v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine }, objectBase)
-    rawset(settings, "Self", v)
+	v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine }, objectBase)
+	rawset(settings, "Self", v)
 
-    ESPs[settings.Class] = ESPs[settings.Class] or { }
-    ESPs[settings.Class][object] = v
-    espCache[object] = v
+	ESPs[settings.Class] = ESPs[settings.Class] or { }
+	ESPs[settings.Class][object] = v
+	espCache[object] = v
 
-    refresh(v)
-    return v
+	refresh(v)
+	return v
 end
 
 base.new = newObject

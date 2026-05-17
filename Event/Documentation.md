@@ -77,20 +77,20 @@ myEvent:DisconnectAll() -- Removes and disconnects all active connections
 
 | Feature | Description |
 |--------|-------------|
-| - | `Event` instance |
+| `Event` instance | - |
 | ✅ `:Connect(func) -> Connection` | Adds a callback that runs every time the event is fired. |
 | ✅ `:Once(func) -> Connection` | Adds a callback that runs **once**, then auto-disconnects. |
 | ✅ `:Wait() -> ...` | **Yields** until the next `Fire()`, then returns all arguments as individual values. |
 | ✅ `:Fire(...) -> void` | Fires the event to **all active connections** using `task.spawn` (non-blocking). |
 | ✅ `:DisconnectAll() -> void` | Removes and disconnects all connections at once. |
-| - | `Connection` instance |
+| `Connection` instance | - |
 | ✅ `:Disconnect() -> void` | Safely removes a connection. Connection object is **frozen** after disconnect. |
 | ✅ `:Fire(...) -> void` | Fires connection **individually**, callback wont be called if `.Connected = false` or `.Enabled = false` |
 | ✅ `.Enabled` | Safe way to disable/enable Connection's callback |
 | ✅ `.Callback` | A function that being called on `:Fire(...)` |
 | ✅ `.Connected` | (Readonly) Shows if connection is still connected |
 | ✅ `.Parent` | (Readonly) Returns Event instance |
-| - | `Other` |
+| `Other` | - |
 | ✅ Thread-Safe | All callbacks run via `task.spawn` — **never blocks** the main thread. |
 | ✅ Immutable Connections | Disconnected connections are `table.freeze()`d to prevent reuse. |
 
@@ -100,7 +100,6 @@ myEvent:DisconnectAll() -- Removes and disconnects all active connections
 
 - **No Memory Leaks**: Disconnected connections are **immediately pruned** on `Fire()` — no stale references.
 - **No Main Thread Blocking**: All callbacks are **asynchronously spawned** using `task.spawn`.
-- **Zero Yield in `Wait()` Loop**: Uses a single, shared `BindableEvent` for instant wake-up — **no polling**.
 - **Frozen Objects**: Disconnected connections are frozen — **prevents accidental reuse**.
 - **Error-Free Misuse**: Attempting to fire or disconnect a disconnected connection **does nothing** — safe by design.
 - **Lightweight**: No external dependencies. Pure Lua + Roblox API.

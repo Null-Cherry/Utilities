@@ -161,9 +161,8 @@ clock:Connect(function(isDefer)
 	end
 end)
 
-fire(clock, false)
-
 rawset(lib, "Clock", fakeClock)
 freeze(lib)
+fire(clock, false)
 
 return lib

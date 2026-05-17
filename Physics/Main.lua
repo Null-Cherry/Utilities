@@ -86,6 +86,7 @@ local spoofQueue = { }
 local spooferBase = {
 	Set = function(self)
 		if not self.Enabled or not self.Object then return end
+		self.BeforeSet:Fire()
 
 		local props = self.Properties
 		local object = self.Object
@@ -100,9 +101,11 @@ local spooferBase = {
 		object.AssemblyAngularVelocity = (props.RotVelocity or object.AssemblyAngularVelocity) + (props.OffsetRotVelocity or zero)
 		
 		originalValues.NewCFrame = object.CFrame
+		self.AfterSet:Fire()
 	end,
 	Restore = function(self)
 		if not self.Object then return end
+		self.BeforeRestore:Fire()
 
 		local object = self.Object
 		local props = self.Properties
@@ -123,6 +126,7 @@ local spooferBase = {
 		end
 
 		clear(originalValues)
+		self.AfterRestore:Fire()
 	end,
 
 	Unlink = function(self)
@@ -130,7 +134,7 @@ local spooferBase = {
 		if found then
 			remove(spoofQueue, found)
 		end
-	end,
+	end
 }
 
 spooferBase = {
@@ -147,7 +151,7 @@ spooferBase = {
 }
 
 local newSpoofer = function(object)
-	local self = smt({ Properties = { }, OriginalValues = { }, Enabled = true, Object = object }, spooferBase)
+	local self = smt({ Properties = { }, OriginalValues = { }, BeforeSet = event.new(), AfterSet = event.new(), BeforeRestore = event.new(), AfterRestore = event.new(), Enabled = true, Object = object }, spooferBase)
 	insert(spoofQueue, self)
 
 	return self

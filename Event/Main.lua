@@ -122,7 +122,7 @@ local lib = setmetatable({
 				
 				winner = v
 				result = pack(...)
-				quickEvent:Fire()
+				quick:Fire()
 			end)
 		end
 		

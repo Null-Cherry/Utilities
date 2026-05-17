@@ -27,6 +27,12 @@ local Event = require(game.ReplicatedStorage.Event) -- Adjust path as needed
 
 ## 🚀 Usage
 
+### Race Events (Roblox Events are supported)
+```lua
+Event:RaceEvents({ Event1, game.Changed, Event2, ... })
+```
+RaceEvents returns "winner" event and what event did return
+
 ### Create a New Event
 ```lua
 local myEvent = Event()        -- shorthand

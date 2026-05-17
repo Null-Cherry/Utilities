@@ -203,19 +203,14 @@ beforeSpoofing:Connect(function()
 	end
 end)
 
-local function camFix()
+playerSpoofer.BeforeRestore:Connect(function()
 	if not lib.Spoofer.AdjustCamera or not lib.Spoofer.Enabled then return end
 
 	local cam = workspace.CurrentCamera
-	if playerSpoofer.Object and cam.CFrame ~= prev and old then
-		cam.CFrame += (playerSpoofer.Object.CFrame.Position - old)
+	if playerSpoofer.Object and playerSpoofer.Enabled and cam.CFrame ~= prev and old then
+		cam.CFrame += (old - playerSpoofer.Object.CFrame.Position)
 		prev = cam.CFrame
 	end
-end
-
-afterSpoofCycle:Connect(camFix)
-afterSpoofing:Connect(function()
-	rns:Wait()
 end)
 
 lib = freeze({

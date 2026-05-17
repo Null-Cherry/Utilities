@@ -19,6 +19,7 @@ local insert = table.insert
 local remove = table.remove
 local rawset = rawset
 local unpack = table.unpack
+local defer = task.defer
 
 local quick = Instance.new("BindableEvent") -- only for instant :Wait response
 local quickEvent = quick.Event
@@ -33,13 +34,12 @@ local connectionBase = {
 		end
 	end,
 	Fire = function(self, ...)
-		if not self.Enabled or not self.Connected then return end
+		if not self.Enabled or not self.Connected or not self.Parent.Enabled then return end
 		spawn(self.Callback, ...)
 	end
 }
 
-connectionBase = { __index = connectionBase }
-
+connectionBase = { __index = connectionBase, __tostring = function() return "Connection" end, __newindex = function(self, key, value) if key ~= "Enabled" then error() end rawset(self, key, value) end }
 local eventBase = {
 	Connect = function(self, func)
 		local connection = smt({ Callback = func, Connected = true, Enabled = true, Parent = self }, connectionBase)
@@ -97,10 +97,10 @@ local eventBase = {
 	end
 }
 
-eventBase = { __index = eventBase }
+eventBase = { __index = eventBase, __tostring = function() return "Event" end, __newindex = function(self, key, value) if key ~= "Enabled" then error() end rawset(self, key, value) end }
 local lib = setmetatable({
 	new = function()
-		return smt({ _Connections = { } }, eventBase)
+		return smt({ _Connections = { }, Enabled = true }, eventBase)
 	end,
 	RaceEvents = function(self, ...)
 		local events = { ... }
@@ -130,8 +130,38 @@ local lib = setmetatable({
 		
 		insert(result, 1, winner)
 		return unpack(result, 1, result.n + 1)
-	end,
-}, { __call = function(self, ...) return self.new(...) end })
+	end
+}, freeze({ __call = function(self, ...) return self.new(...) end }))
 global[n] = lib
+
+local clock, fakeClock, deferClock = lib.new(), lib.new(), lib.new()
+local race = lib.RaceEvents
+local rs = game:GetService("RunService")
+local r1, r2, r3 = rs.RenderStepped, rs.Heartbeat, rs.Stepped
+local last = tick()
+local fire = clock.Fire
+
+clock:Connect(function(skip)
+	local current = tick()
+	fakeClock:Fire(current - last)
+	last = current
+	
+	if skip then return end
+	
+	race(clock, r1, r2, r3)
+	fire(clock)
+	
+	for i = 1, 78 do
+		defer(fire, deferClock)
+		deferClock:Wait()
+		
+		if i <= 3 or i == 10 or i == 78 then
+			fire(clock, true)
+		end
+	end
+end)
+
+rawset(lib, "Clock", fakeClock)
+freeze(lib)
 
 return lib

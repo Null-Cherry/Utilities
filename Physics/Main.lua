@@ -99,7 +99,7 @@ local spooferBase = {
 		object.CFrame = (props.CFrame or object.CFrame) * (props.OffsetCFrame or cfz)
 		object.AssemblyLinearVelocity = (props.Velocity or object.AssemblyLinearVelocity) + (props.OffsetVelocity or zero) + v3(fr() / 2, fr() / 2, fr() / 2)
 		object.AssemblyAngularVelocity = (props.RotVelocity or object.AssemblyAngularVelocity) + (props.OffsetRotVelocity or zero)
-		
+
 		originalValues.NewCFrame = object.CFrame
 		self.AfterSet:Fire()
 	end,
@@ -110,10 +110,10 @@ local spooferBase = {
 		local object = self.Object
 		local props = self.Properties
 		local originalValues = self.OriginalValues
-		
+
 		local newCFrame = originalValues.NewCFrame
 		originalValues.NewCFrame = nil
-		
+
 		if newCFrame then
 			if (object.Position - newCFrame.Position).Magnitude >= 0.01 then -- teleported
 				originalValues.CFrame = nil
@@ -190,7 +190,7 @@ task.spawn(function()
 		for i, v in spoofQueue do
 			v:Restore()
 		end
-		
+
 		s:Wait()
 		afterSpoofCycle:Fire()
 	end
@@ -203,7 +203,7 @@ beforeSpoofing:Connect(function()
 	end
 end)
 
-afterSpoofCycle:Connect(function()
+local function camFix()
 	if not lib.Spoofer.AdjustCamera or not lib.Spoofer.Enabled then return end
 
 	local cam = workspace.CurrentCamera
@@ -211,6 +211,11 @@ afterSpoofCycle:Connect(function()
 		cam.CFrame += (playerSpoofer.Object.CFrame.Position - old)
 		prev = cam.CFrame
 	end
+end
+
+afterSpoofCycle:Connect(camFix)
+afterSpoofing:Connect(function()
+	rns:Wait()
 end)
 
 lib = freeze({

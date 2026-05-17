@@ -95,9 +95,6 @@ end
 local resetState = false
 task.spawn(function()
 	while true do
-		local _, skip = clock:Wait()
-		if skip then continue end
-		
 		local random = random()
 		if random * library.RandomLagTime > 0 then
 			local start = tick()
@@ -106,29 +103,34 @@ task.spawn(function()
 			end
 		end
 		
-		if #history == 0 or library.Delay <= 0 then
-			if not library.Enabled and not resetState then
-				resetState = true
-				fakeHrp.Parent = nil
+		while true do
+			local _, skip = clock:Wait()
+			if skip then break end
+			
+			if #history == 0 or library.Delay <= 0 then
+				if not library.Enabled and not resetState then
+					resetState = true
+					fakeHrp.Parent = nil
 
-				if not library.DontResetValues then
-					plrSpoofer.CFrame, plrSpoofer.Velocity, plrSpoofer.RotVelocity = nil, nil, nil
+					if not library.DontResetValues then
+						plrSpoofer.CFrame, plrSpoofer.Velocity, plrSpoofer.RotVelocity = nil, nil, nil
+					end
 				end
+
+				break
 			end
 
-			continue
-		end
+			local record = history[1]
+			if record[4] + library.Delay < tick() then
+				remove(history, 1)
+			end
 
-		local record = history[1]
-		if record[4] + library.Delay < tick() then
-			remove(history, 1)
+			plrSpoofer.CFrame = record[1]
+			plrSpoofer.Velocity = library.OverrideVelocity or record[2]
+			plrSpoofer.RotVelocity = library.OverrideRotVelocity or record[3]
+			fakeHrp.CFrame = record[1]
+			fakeHrp.Parent = library.Show and (workspace:FindFirstChildOfClass("Terrain") or workspace) or nil
 		end
-
-		plrSpoofer.CFrame = record[1]
-		plrSpoofer.Velocity = library.OverrideVelocity or record[2]
-		plrSpoofer.RotVelocity = library.OverrideRotVelocity or record[3]
-		fakeHrp.CFrame = record[1]
-		fakeHrp.Parent = library.Show and (workspace:FindFirstChildOfClass("Terrain") or workspace) or nil
 	end
 end)
 

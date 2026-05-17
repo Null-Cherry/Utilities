@@ -396,7 +396,7 @@ end
 local ESPBaseSettings = {
 	Highlight = true,
 	HighlightAdornee = false,
-	Tracer = true,
+	Tracer = false,
 	Text = "",
 	TopText = "",
 	Visible = true,

@@ -37,7 +37,7 @@ RaceEvents returns "winner" event and what event did return
 ```lua
 Event.Clock:Connect(function(delta, isDefer) end)
 ```
-Clock is a mix of RenderStepped, Stepped, Hearbeat and a few task.defer's
+Clock is a mix of RenderStepped, Stepped, Hearbeat, task.wait a few of task.defer
 
 ### Create a New Event
 ```lua

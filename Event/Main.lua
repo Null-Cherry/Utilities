@@ -98,14 +98,37 @@ local eventBase = {
 }
 
 eventBase = { __index = eventBase }
-
-local new = function()
-	return smt({ _Connections = { } }, eventBase)
-end
-
 local lib = setmetatable({
-	new = new
-}, { __call = function(_, ...) return new(...) end })
+	new = function()
+		return smt({ _Connections = { } }, eventBase)
+	end,
+	RaceEvents = function(self, ...)
+		local events = { ... }
+		if typeof(events[1]) == "table" then
+			events = events[1]
+		end
+		
+		if #events == 0 then return end
+		if #events == 1 then return events[1]:Wait() end
+		
+		local result
+		local connections = { }
+		
+		for i, v in events do
+			connections[#connections + 1] = v:Once(function(...)
+				for i, v in connections do
+					v:Disconnect()
+				end
+				
+				result = pack(...)
+				quickEvent:Fire()
+			end)
+		end
+		
+		repeat quickEvent:Wait() until result
+		return unpack(result, 1, result.n)
+	end,
+}, { __call = function(self, ...) return self.new(...) end })
 global[n] = lib
 
 return lib

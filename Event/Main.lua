@@ -111,7 +111,7 @@ local lib = setmetatable({
 		if #events == 0 then return end
 		if #events == 1 then return events[1]:Wait() end
 		
-		local result
+		local result, winner
 		local connections = { }
 		
 		for i, v in events do
@@ -120,13 +120,16 @@ local lib = setmetatable({
 					v:Disconnect()
 				end
 				
+				winner = v
 				result = pack(...)
 				quickEvent:Fire()
 			end)
 		end
 		
 		repeat quickEvent:Wait() until result
-		return unpack(result, 1, result.n)
+		
+		insert(result, 1, winner)
+		return unpack(result, 1, result.n + 1)
 	end,
 }, { __call = function(self, ...) return self.new(...) end })
 global[n] = lib

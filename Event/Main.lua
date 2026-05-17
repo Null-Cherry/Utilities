@@ -1,3 +1,15 @@
+local env = getfenv()
+local function g(n)
+	return env[n]
+end
+
+local global = (g("getgenv") or function() return _G end)()
+local n = "EventLib1"
+
+if global[n] then
+	return global[n]
+end
+
 local pack = table.pack
 local error = error
 local spawn = task.spawn
@@ -13,26 +25,27 @@ local quickEvent = quick.Event
 
 local connectionBase = {
 	Disconnect = function(self)
-		rawset(self, "Connected", false)
-		freeze(self)
+		if self.Connected then
+			rawset(self, "Connected", false)
+			freeze(self)
+			
+			self.Parent:Cleanup()
+		end
 	end,
 	Fire = function(self, ...)
-		if not self.Connected then
-			error("Event is not connected!", 0)
-		end
-
-		if not self.Enabled then return end
-
+		if not self.Enabled or not self.Connected then return end
 		spawn(self.Callback, ...)
-	end,
+	end
 }
 
 connectionBase = { __index = connectionBase }
 
 local eventBase = {
 	Connect = function(self, func)
-		local connection = smt({ Callback = func, Connected = true, Enabled = true }, connectionBase)
+		local connection = smt({ Callback = func, Connected = true, Enabled = true, Parent = self }, connectionBase)
 		insert(self._Connections, connection)
+		
+		self:Cleanup()
 
 		return connection
 	end,
@@ -56,16 +69,31 @@ local eventBase = {
 		repeat quickEvent:Wait() until result
 		return unpack(result, 1, result.n)
 	end,
-	Fire = function(self, ...)
+	Cleanup = function(self) -- usually not needed to be called manually
 		local cons = self._Connections
-		for i = #cons, 1, -1 do
-			local v = cons[i]
-			if v.Connected then
-				v:Fire(...)
-			else
+		local i = 1
+		
+		while i <= #cons do
+			if not cons[i].Connected then
 				remove(cons, i)
+			else
+				i += 1
 			end
 		end
+	end,
+	
+	Fire = function(self, ...)
+		local cons = self._Connections
+		for i = 1, #cons do
+			cons[i]:Fire(...)
+		end
+	end,
+	DisconnectAll = function(self)
+		for i, v in self._Connections do
+			v:Disconnect()
+		end
+		
+		self:Cleanup()
 	end
 }
 
@@ -75,6 +103,9 @@ local new = function()
 	return smt({ _Connections = { } }, eventBase)
 end
 
-return setmetatable({
+local lib = setmetatable({
 	new = new
 }, { __call = function(_, ...) return new(...) end })
+global[n] = lib
+
+return lib

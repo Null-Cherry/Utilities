@@ -35,71 +35,47 @@ local cfz = ncf()
 
 local ino = getfenv().isnetworkowner
 local ghp = getfenv().gethiddenproperty
+local request = getfenv().request
 
-local connectionBase = {
-	Disconnect = function(self)
-		rawset(self, "Connected", false)
-		freeze(self)
-	end,
-	Fire = function(self, ...)
-		if not self.Connected then
-			error("Event is not connected!", 0)
-		end
+local function gHTTPG(url)
+	return game:HttpGet(url)
+end
 
-		if not self.Enabled then return end
+local function httpGet(url)
+	if request then
+		local result = request({ Url = url, Method = "GET", Headers = { } })
+		local success = result.Success or tostring(result.StatusCode):sub(1, 1) == "2"
+		return success and result.Body or "", success
+	else
+		local s, e = pcall(gHTTPG, url)
+		return s and e or "", s
+	end
+end
 
-		spawn(self.Callback, ...)
-	end,
-}
+local function urlLoad(url)
+	local ret
+	while true do
+		ret = nil
 
-connectionBase = { __index = connectionBase }
+		local r, s = httpGet(url)
+		if s then
+			ret = loadstring(r)
 
-local eventBase = {
-	Connect = function(self, func)
-		local connection = smt({ Callback = func, Connected = true, Enabled = true }, connectionBase)
-		insert(self._Connections, connection)
+			if ret then
+				ret = ret()
 
-		return connection
-	end,
-	Once = function(self, func)
-		local con; con = self:Connect(function(...)
-			con:Disconnect()
-			con = nil
-
-			func(...)
-		end)
-
-		return con
-	end,
-	Wait = function(self)
-		local result
-		self:Once(function(...)
-			result = pack(...)
-		end)
-
-		repeat wait() until result
-		return unpack(result, 1, result.n)
-	end,
-	Fire = function(self, ...)
-		local cons = self._Connections
-		for i = #cons, 1, -1 do
-			local v = cons[i]
-			if v.Connected then
-				spawn(v.Fire, v, ...)
-			else
-				remove(cons, i)
+				if ret then
+					break
+				end
 			end
 		end
 	end
-}
 
-eventBase = { __index = eventBase }
-local event = smt({
-	new = function()
-		return smt({ _Connections = { } }, eventBase)
-	end
-}, { __call = function(self, ...) return self.new(...) end })
+	return ret
+end
 
+
+local event = urlLoad("https://raw.githubusercontent.com/Null-Cherry/Utilities/refs/heads/main/Event/Main.lua")
 local beforeSpoofing, afterSpoofing, afterSpoofCycle = event.new(), event.new(), event.new()
 
 local function fr()

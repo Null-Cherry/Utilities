@@ -141,15 +141,15 @@ local r1, r2, r3 = rs.RenderStepped, rs.Heartbeat, rs.Stepped
 local last = tick()
 local fire = clock.Fire
 
-clock:Connect(function(skip)
+clock:Connect(function(isDefer)
 	local current = tick()
-	fakeClock:Fire(current - last)
+	fakeClock:Fire(current - last, isDefer)
 	last = current
 	
-	if skip then return end
+	if isDefer then return end
 	
 	race(clock, r1, r2, r3)
-	fire(clock)
+	fire(clock, false)
 	
 	for i = 1, 78 do
 		defer(fire, deferClock)

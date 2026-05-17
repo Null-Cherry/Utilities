@@ -35,7 +35,7 @@ RaceEvents returns "winner" event and what event did return
 
 ### Clock (the fastest spam-event)
 ```lua
-Event.Clock:Connect()
+Event.Clock:Connect(function(delta, isDefer) end)
 ```
 Clock is a mix of RenderStepped, Stepped, Hearbeat and a few task.defer's
 

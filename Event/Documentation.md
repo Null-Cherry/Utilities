@@ -33,6 +33,12 @@ Event:RaceEvents({ Event1, game.Changed, Event2, ... })
 ```
 RaceEvents returns "winner" event and what event did return
 
+### Clock (the fastest spam-event)
+```lua
+Event.Clock:Connect()
+```
+Clock is a mix of RenderStepped, Stepped, Hearbeat and a few task.defer's
+
 ### Create a New Event
 ```lua
 local myEvent = Event()        -- shorthand

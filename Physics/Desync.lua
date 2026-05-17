@@ -93,6 +93,9 @@ end
 local resetState = false
 task.spawn(function()
 	while true do
+		local _, skip = clock:Wait()
+		if skip then continue end
+		
 		if #history == 0 or library.Delay <= 0 then
 			if not library.Enabled and not resetState then
 				resetState = true

@@ -385,7 +385,7 @@ refresh = function(self)
 	topText.Text = settings.TopText
 	topText.TextColor3 = color
 
-	local tracerEnabled = settings.Tracer or base.Tracers and base[settings.Class].Tracers
+	local tracerEnabled = settings.Tracer or base.Tracers and base.ClassSettings[settings.Class].Tracers
 	if not tracerEnabled then
 		return updateLine(line, false)
 	end

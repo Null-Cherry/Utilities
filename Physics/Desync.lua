@@ -123,6 +123,8 @@ task.spawn(function()
 			local record = history[1]
 			if record[4] + library.Delay < tick() then
 				remove(history, 1)
+			else
+				break
 			end
 
 			plrSpoofer.CFrame = record[1]

@@ -20,6 +20,7 @@ local remove = table.remove
 local rawset = rawset
 local unpack = table.unpack
 local defer = task.defer
+local delay = task.delay
 
 local quick = Instance.new("BindableEvent") -- only for instant :Wait response
 local quickEvent = quick.Event
@@ -140,23 +141,26 @@ local rs = game:GetService("RunService")
 local r1, r2, r3 = rs.RenderStepped, rs.Heartbeat, rs.Stepped
 local last = tick()
 local fire = clock.Fire
+local maxDefer = 10
 
-clock:Connect(function(isDefer)
+clock:Connect(function(isDefer, dontFire)
 	local current = tick()
 	fakeClock:Fire(current - last, isDefer)
 	last = current
 	
-	if isDefer then return end
+	if dontFire then return end
 	
 	race(clock, r1, r2, r3)
-	fire(clock, false)
+	fire(clock, false, false)
+	delay(0, fire, clock, false, true)
 	
-	for i = 1, 78 do
+	for i = 1, maxDefer do
 		defer(fire, deferClock)
 		deferClock:Wait()
 		
-		if i <= 3 or i == 10 or i == 78 then
-			fire(clock, true)
+		if i <= 3 or i == 10 or i == maxDefer then
+			fire(clock, true, true)
+			delay(0, fire, clock, false, true)
 		end
 	end
 end)

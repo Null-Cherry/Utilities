@@ -58,6 +58,7 @@ local rs = game:GetService("RunService")
 local library = {
 	Enabled = false,
 	Delay = 1,
+	RandomLagTime = 0,
 	Show = false,
 	DontResetValues = false,
 	ClearHistoryOnDeath = true,
@@ -75,6 +76,7 @@ local history = { }
 local insert, remove, clear = table.insert, table.remove, table.clear
 local tick = tick
 local wait = task.wait
+local random = math.random
 
 local plr = game:GetService("Players").LocalPlayer
 local fakeHrp = Instance.new("Part")
@@ -95,6 +97,14 @@ task.spawn(function()
 	while true do
 		local _, skip = clock:Wait()
 		if skip then continue end
+		
+		local random = random()
+		if random * library.RandomLagTime > 0 then
+			local start = tick()
+			while tick() - start < random * library.RandomLagTime do
+				wait()
+			end
+		end
 		
 		if #history == 0 or library.Delay <= 0 then
 			if not library.Enabled and not resetState then

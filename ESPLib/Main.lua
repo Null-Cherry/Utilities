@@ -253,7 +253,7 @@ onUpdate = { __newindex = onUpdate }
 local base = {
 	RGBSpeed = 1,
 	RGB = false,
-	Tracers = false,
+	Tracers = true,
 	FromPoint = "Bottom",
 	Performant = false,
 	ClassSettings = setmetatable({ }, {

@@ -289,7 +289,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	maxY = (cam and cam.ViewportSize.Y or 0) + f
 
 	if base.FromPoint == "Bottom" then
-		fromPoint = cam and v2(cam.ViewportSize.X / 2, cam.ViewportSize.Y) or v2(0, 0)
+		fromPoint = cam and v2(cam.ViewportSize.X / 2, cam.ViewportSize.Y + topb.AbsoluteSize.Y) or v2(0, 0)
 	elseif typeof(base.FromPoint) == "Vector2" then
 		fromPoint = base.FromPoint
 	else

@@ -223,7 +223,7 @@ local updateLine = dnew and function(line, visible, to, color)
 	line.From = fromPoint
 	line.To = to
 	line.Color = color
-	line.Thickness = 2
+	line.Thickness = 1
 end or function(line, visible, to, color)
 	line.Visible = false
 	if not visible then return end
@@ -232,7 +232,7 @@ end or function(line, visible, to, color)
 	local center = (to + fromPoint) / 2
 	line.Position = u2(0, center.X, 0, center.Y)
 	line.Rotation = deg(atan2(direction.Y, direction.X))
-	line.Size =  u2(0, direction.Magnitude, 0, 2)
+	line.Size =  u2(0, direction.Magnitude, 0, 1)
 	line.BackgroundColor3 = color
 	line.Visible = true
 end

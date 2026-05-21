@@ -603,39 +603,43 @@ end, __newindex = function(self, idx, val)
     refresh(self)
 end }
 
+local destroyCover = function(self)
+	return self.Settings:Destroy()
+end
+
 local function newObject(object, settings, class)
-    settings = setmetatable(settings or { }, ESPBaseSettings)
-    if class then
-        rawset(settings, "Class", class)
-    end
+	settings = setmetatable(settings or { }, ESPBaseSettings)
+	if class then
+		rawset(settings, "Class", class)
+	end
 
-    rawset(settings, "Settings", settings)
+	rawset(settings, "Settings", settings)
 
-    local v = espCache[object]
-    if v then
-        ESPs[v.Settings.Class][object] = nil
-        ESPs[settings.Class][object] = v
-        rawset(v, "Settings", settings)
+	local v = espCache[object]
+	if v then
+		ESPs[v.Settings.Class][object] = nil
+		ESPs[settings.Class][object] = v
+		rawset(v, "Settings", settings)
 
-        refresh(v)
-        return v
-    end
+		refresh(v)
+		return v
+	end
 
-    local espObj = ESPObj:Clone()
-    espObj.Parent = holder
+	local espObj = ESPObj:Clone()
+	espObj.Parent = holder
 
-    local tracerLine = newLine()
-    updateLine(tracerLine, false)
+	local tracerLine = newLine()
+	updateLine(tracerLine, false)
 
-    v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine }, objectBase)
-    rawset(settings, "Self", v)
+	v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine, Destroy = destroyCover }, objectBase)
+	rawset(settings, "Self", v)
 
-    ESPs[settings.Class] = ESPs[settings.Class] or { }
-    ESPs[settings.Class][object] = v
-    espCache[object] = v
+	ESPs[settings.Class] = ESPs[settings.Class] or { }
+	ESPs[settings.Class][object] = v
+	espCache[object] = v
 
-    refresh(v)
-    return v
+	refresh(v)
+	return v
 end
 
 base.new = newObject

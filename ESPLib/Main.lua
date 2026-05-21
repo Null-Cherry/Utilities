@@ -4,7 +4,7 @@
 --
 
 -- Create objects
-local parent = nil;
+local parent = false;
 local objects = {
     ["Instance0"] = Instance.new("ModuleScript");
     ["Instance1"] = Instance.new("BillboardGui");
@@ -323,7 +323,7 @@ local workspace, game = workspace, game
 local holder = inew("Folder", game:GetService("CoreGui") or workspace)
 holder.Name = "ESPLib"
 
-local event = require(script.Event).new()
+local event = require(script.Event)
 local ESPs = { }
 
 local rawset, rawget = rawset, rawget
@@ -404,7 +404,7 @@ local updateLine = dnew and function(line, visible, to, color)
     line.From = fromPoint
     line.To = to
     line.Color = color
-    line.Thickness = 2
+    line.Thickness = 1
 end or function(line, visible, to, color)
     line.Visible = false
     if not visible then return end
@@ -413,7 +413,7 @@ end or function(line, visible, to, color)
     local center = (to + fromPoint) / 2
     line.Position = u2(0, center.X, 0, center.Y)
     line.Rotation = deg(atan2(direction.Y, direction.X))
-    line.Size =  u2(0, direction.Magnitude, 0, 2)
+    line.Size =  u2(0, direction.Magnitude, 0, 1)
     line.BackgroundColor3 = color
     line.Visible = true
 end
@@ -421,6 +421,7 @@ end
 local refresh
 local onUpdate = function(self, idx, val)
     rawset(self, idx, val)
+    self.Changed:Fire(idx, val)
 
     for _, v in self.Objects do
         refresh(v)
@@ -431,13 +432,14 @@ local currentRGBColor = hsv(tick() % 1, 1, 1)
 
 onUpdate = { __newindex = onUpdate }
 
+local ev = event.new()
 local base = {
     RGBSpeed = 1,
     RGB = false,
     Tracers = true,
     FromPoint = "Bottom",
     Performant = false,
-    Event = event,
+    Event = ev,
     ClassSettings = setmetatable({ }, {
         __index = function(self, idx)
             local tbl = rawget(self, idx)
@@ -448,11 +450,12 @@ local base = {
                     Tracers = false,
                     RGB = false,
                     Objects = ESPs[idx],
-                    Visible = false
+                    Visible = false,
+                    Changed = event.new()
                 }, onUpdate)
 
                 rawset(self, idx, tbl)
-                event:Fire(idx, tbl)
+                ev:Fire(idx, tbl)
             end
 
             return tbl
@@ -645,4 +648,3 @@ end;
 -- YOUR CODE DOWN HERE --
 
 local obj = objects["Instance0"];
-return require(obj)

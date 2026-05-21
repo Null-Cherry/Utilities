@@ -4,7 +4,7 @@
 --
 
 -- Create objects
-local parent = false;
+local parent = nil;
 local objects = {
     ["Instance0"] = Instance.new("ModuleScript");
     ["Instance1"] = Instance.new("BillboardGui");

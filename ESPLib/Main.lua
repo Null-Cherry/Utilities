@@ -4,105 +4,104 @@
 --
 
 -- Create objects
-local parent = nil;
 local objects = {
     ["Instance0"] = Instance.new("ModuleScript");
-    ["Instance1"] = Instance.new("BillboardGui");
-    ["Instance2"] = Instance.new("Frame");
-    ["Instance3"] = Instance.new("UICorner");
-    ["Instance4"] = Instance.new("UIStroke");
-    ["Instance5"] = Instance.new("UIGradient");
-    ["Instance6"] = Instance.new("TextLabel");
-    ["Instance7"] = Instance.new("UIStroke");
-    ["Instance8"] = Instance.new("Highlight");
-    ["Instance9"] = Instance.new("TextLabel");
-    ["Instance10"] = Instance.new("UIStroke");
-    ["Instance11"] = Instance.new("ModuleScript");
+    ["Instance1"] = Instance.new("ModuleScript");
+    ["Instance2"] = Instance.new("BillboardGui");
+    ["Instance3"] = Instance.new("Frame");
+    ["Instance4"] = Instance.new("UICorner");
+    ["Instance5"] = Instance.new("UIStroke");
+    ["Instance6"] = Instance.new("UIGradient");
+    ["Instance7"] = Instance.new("TextLabel");
+    ["Instance8"] = Instance.new("UIStroke");
+    ["Instance9"] = Instance.new("Highlight");
+    ["Instance10"] = Instance.new("TextLabel");
+    ["Instance11"] = Instance.new("UIStroke");
 };
 
 do -- Set properties
     objects["Instance0"]["Parent"] = parent;
     objects["Instance0"]["Name"] = "ESPLib";
 
-    objects["Instance1"]["LightInfluence"] = 1;
-    objects["Instance1"]["Name"] = "ESPObject";
-    objects["Instance1"]["Active"] = true;
     objects["Instance1"]["Parent"] = objects["Instance0"];
-    objects["Instance1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
-    objects["Instance1"]["AlwaysOnTop"] = true;
-    objects["Instance1"]["Size"] = UDim2.new(0, 20, 0, 20);
+    objects["Instance1"]["Name"] = "Event";
 
-    objects["Instance2"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
-    objects["Instance2"]["BorderColor3"] = Color3.new(0, 0, 0);
-    objects["Instance2"]["Name"] = "Circle";
-    objects["Instance2"]["Position"] = UDim2.new(0.5, 0, 0.5, 2);
-    objects["Instance2"]["Parent"] = objects["Instance1"];
-    objects["Instance2"]["Size"] = UDim2.new(1, -8, 1, -8);
-    objects["Instance2"]["BorderSizePixel"] = 0;
-    objects["Instance2"]["BackgroundColor3"] = Color3.new(1, 1, 1);
+    objects["Instance2"]["LightInfluence"] = 1;
+    objects["Instance2"]["Name"] = "ESPObject";
+    objects["Instance2"]["Active"] = true;
+    objects["Instance2"]["Parent"] = objects["Instance0"];
+    objects["Instance2"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
+    objects["Instance2"]["AlwaysOnTop"] = true;
+    objects["Instance2"]["Size"] = UDim2.new(0, 20, 0, 20);
 
+    objects["Instance3"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+    objects["Instance3"]["BorderColor3"] = Color3.new(0, 0, 0);
+    objects["Instance3"]["Name"] = "Circle";
+    objects["Instance3"]["Position"] = UDim2.new(0.5, 0, 0.5, 2);
     objects["Instance3"]["Parent"] = objects["Instance2"];
+    objects["Instance3"]["Size"] = UDim2.new(1, -8, 1, -8);
+    objects["Instance3"]["BorderSizePixel"] = 0;
+    objects["Instance3"]["BackgroundColor3"] = Color3.new(1, 1, 1);
 
-    objects["Instance4"]["Thickness"] = 2;
-    objects["Instance4"]["Parent"] = objects["Instance2"];
+    objects["Instance4"]["Parent"] = objects["Instance3"];
 
-    objects["Instance5"]["Rotation"] = 90;
-    objects["Instance5"]["Parent"] = objects["Instance2"];
-    objects["Instance5"]["Color"] = ColorSequence.new({
+    objects["Instance5"]["Thickness"] = 2;
+    objects["Instance5"]["Parent"] = objects["Instance3"];
+
+    objects["Instance6"]["Rotation"] = 90;
+    objects["Instance6"]["Parent"] = objects["Instance3"];
+    objects["Instance6"]["Color"] = ColorSequence.new({
     [1] = ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
     [2] = ColorSequenceKeypoint.new(1, Color3.new(0.686275, 0.686275, 0.686275))
 });
 
-    objects["Instance6"]["FontSize"] = Enum.FontSize.Size14;
-    objects["Instance6"]["Parent"] = objects["Instance1"];
-    objects["Instance6"]["AnchorPoint"] = Vector2.new(0.5, 0);
-    objects["Instance6"]["BorderSizePixel"] = 0;
-    objects["Instance6"]["Size"] = UDim2.new(0, 10000, 0, 10000);
-    objects["Instance6"]["RichText"] = true;
-    objects["Instance6"]["TextColor3"] = Color3.new(1, 1, 1);
-    objects["Instance6"]["BorderColor3"] = Color3.new(0, 0, 0);
-    objects["Instance6"]["Text"] = "Point zero";
-    objects["Instance6"]["TextWrap"] = true;
-    objects["Instance6"]["TextWrapped"] = true;
-    objects["Instance6"]["BackgroundTransparency"] = 1;
-    objects["Instance6"]["Position"] = UDim2.new(0.5, 0, 1, -1);
-    objects["Instance6"]["TextSize"] = 14;
-    objects["Instance6"]["TextYAlignment"] = Enum.TextYAlignment.Top;
-    objects["Instance6"]["FontFace"] = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal, true);
-    objects["Instance6"]["BackgroundColor3"] = Color3.new(1, 1, 1);
+    objects["Instance7"]["FontSize"] = Enum.FontSize.Size14;
+    objects["Instance7"]["Parent"] = objects["Instance2"];
+    objects["Instance7"]["AnchorPoint"] = Vector2.new(0.5, 0);
+    objects["Instance7"]["BorderSizePixel"] = 0;
+    objects["Instance7"]["Size"] = UDim2.new(0, 10000, 0, 10000);
+    objects["Instance7"]["RichText"] = true;
+    objects["Instance7"]["TextColor3"] = Color3.new(1, 1, 1);
+    objects["Instance7"]["BorderColor3"] = Color3.new(0, 0, 0);
+    objects["Instance7"]["Text"] = "Point zero";
+    objects["Instance7"]["TextWrap"] = true;
+    objects["Instance7"]["TextWrapped"] = true;
+    objects["Instance7"]["BackgroundTransparency"] = 1;
+    objects["Instance7"]["Position"] = UDim2.new(0.5, 0, 1, -1);
+    objects["Instance7"]["TextSize"] = 14;
+    objects["Instance7"]["TextYAlignment"] = Enum.TextYAlignment.Top;
+    objects["Instance7"]["FontFace"] = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal, true);
+    objects["Instance7"]["BackgroundColor3"] = Color3.new(1, 1, 1);
 
-    objects["Instance7"]["Thickness"] = 2;
-    objects["Instance7"]["Parent"] = objects["Instance6"];
+    objects["Instance8"]["Thickness"] = 2;
+    objects["Instance8"]["Parent"] = objects["Instance7"];
 
-    objects["Instance8"]["Parent"] = objects["Instance1"];
-    objects["Instance8"]["FillColor"] = Color3.new(1, 1, 1);
-    objects["Instance8"]["FillTransparency"] = 0.75;
-    objects["Instance8"]["Enabled"] = false;
+    objects["Instance9"]["Parent"] = objects["Instance2"];
+    objects["Instance9"]["FillColor"] = Color3.new(1, 1, 1);
+    objects["Instance9"]["FillTransparency"] = 0.75;
+    objects["Instance9"]["Enabled"] = false;
 
-    objects["Instance9"]["FontSize"] = Enum.FontSize.Size12;
-    objects["Instance9"]["Parent"] = objects["Instance1"];
-    objects["Instance9"]["AnchorPoint"] = Vector2.new(0.5, 1);
-    objects["Instance9"]["BorderSizePixel"] = 0;
-    objects["Instance9"]["Size"] = UDim2.new(0, 10000, 0, 10000);
-    objects["Instance9"]["RichText"] = true;
-    objects["Instance9"]["TextColor3"] = Color3.new(1, 1, 1);
-    objects["Instance9"]["BorderColor3"] = Color3.new(0, 0, 0);
-    objects["Instance9"]["Text"] = "<font transparency=\"0.25\">World's 0, 0, 0 point</font>";
-    objects["Instance9"]["TextWrap"] = true;
-    objects["Instance9"]["Name"] = "TopTextLabel";
-    objects["Instance9"]["TextWrapped"] = true;
-    objects["Instance9"]["BackgroundTransparency"] = 1;
-    objects["Instance9"]["Position"] = UDim2.new(0.5, 0, 0, 2);
-    objects["Instance9"]["TextSize"] = 12;
-    objects["Instance9"]["TextYAlignment"] = Enum.TextYAlignment.Bottom;
-    objects["Instance9"]["FontFace"] = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal, true);
-    objects["Instance9"]["BackgroundColor3"] = Color3.new(1, 1, 1);
+    objects["Instance10"]["FontSize"] = Enum.FontSize.Size12;
+    objects["Instance10"]["Parent"] = objects["Instance2"];
+    objects["Instance10"]["AnchorPoint"] = Vector2.new(0.5, 1);
+    objects["Instance10"]["BorderSizePixel"] = 0;
+    objects["Instance10"]["Size"] = UDim2.new(0, 10000, 0, 10000);
+    objects["Instance10"]["RichText"] = true;
+    objects["Instance10"]["TextColor3"] = Color3.new(1, 1, 1);
+    objects["Instance10"]["BorderColor3"] = Color3.new(0, 0, 0);
+    objects["Instance10"]["Text"] = "<font transparency=\"0.25\">World's 0, 0, 0 point</font>";
+    objects["Instance10"]["TextWrap"] = true;
+    objects["Instance10"]["Name"] = "TopTextLabel";
+    objects["Instance10"]["TextWrapped"] = true;
+    objects["Instance10"]["BackgroundTransparency"] = 1;
+    objects["Instance10"]["Position"] = UDim2.new(0.5, 0, 0, 2);
+    objects["Instance10"]["TextSize"] = 12;
+    objects["Instance10"]["TextYAlignment"] = Enum.TextYAlignment.Bottom;
+    objects["Instance10"]["FontFace"] = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal, true);
+    objects["Instance10"]["BackgroundColor3"] = Color3.new(1, 1, 1);
 
-    objects["Instance10"]["Thickness"] = 2;
-    objects["Instance10"]["Parent"] = objects["Instance9"];
-
-    objects["Instance11"]["Parent"] = objects["Instance0"];
-    objects["Instance11"]["Name"] = "Event";
+    objects["Instance11"]["Thickness"] = 2;
+    objects["Instance11"]["Parent"] = objects["Instance10"];
 end;
 local ___args = table.pack(...); local ___up = unpack;
 
@@ -121,8 +120,8 @@ local modules do
 
     getfenv().require = require;
 
-    modules[objects["Instance11"]] = function(...)
-        local script = objects["Instance11"];
+    modules[objects["Instance1"]] = function(...)
+        local script = objects["Instance1"];
 local env = getfenv()
 local function g(n)
     return env[n]
@@ -155,7 +154,7 @@ local connectionBase = {
         if self.Connected then
             rawset(self, "Connected", false)
             freeze(self)
-            
+
             self.Parent:Cleanup()
         end
     end,
@@ -170,8 +169,6 @@ local eventBase = {
     Connect = function(self, func)
         local connection = smt({ Callback = func, Connected = true, Enabled = true, Parent = self }, connectionBase)
         insert(self._Connections, connection)
-        
-        self:Cleanup()
 
         return connection
     end,
@@ -197,29 +194,32 @@ local eventBase = {
     end,
     Cleanup = function(self) -- usually not needed to be called manually
         local cons = self._Connections
-        local i = 1
-        
-        while i <= #cons do
-            if not cons[i].Connected then
+        local i, ln = 1, #cons
+
+        while i <= ln do
+            if not cons[i] or not cons[i].Connected then
                 remove(cons, i)
+                ln -= 1
             else
                 i += 1
             end
         end
     end,
-    
+
     Fire = function(self, ...)
+        self:Cleanup()
+
         local cons = self._Connections
         for i = 1, #cons do
-            cons[i]:Fire(...)
+            if cons[i] then
+                cons[i]:Fire(...)
+            end
         end
     end,
     DisconnectAll = function(self)
         for i, v in self._Connections do
             v:Disconnect()
         end
-        
-        self:Cleanup()
     end
 }
 
@@ -233,27 +233,27 @@ local lib = setmetatable({
         if typeof(events[1]) == "table" then
             events = events[1]
         end
-        
+
         if #events == 0 then return end
         if #events == 1 then return events[1]:Wait() end
-        
+
         local result, winner
         local connections = { }
-        
+
         for i, v in events do
             connections[#connections + 1] = v:Once(function(...)
                 for i, v in connections do
                     v:Disconnect()
                 end
-                
+
                 winner = v
                 result = pack(...)
                 quick:Fire()
             end)
         end
-        
+
         repeat quickEvent:Wait() until result
-        
+
         insert(result, 1, winner)
         return unpack(result, 1, result.n + 1)
     end
@@ -272,17 +272,17 @@ clock:Connect(function(isDefer, dontFire)
     local current = tick()
     fakeClock:Fire(current - last, isDefer)
     last = current
-    
+
     if dontFire then return end
-    
+
     race(clock, r1, r2, r3)
     fire(clock, false, false)
     delay(0, fire, clock, false, true)
-    
+
     for i = 1, maxDefer do
         defer(fire, deferClock)
         deferClock:Wait()
-        
+
         if i <= 3 or i == 10 or i == maxDefer then
             fire(clock, true, true)
             delay(0, fire, clock, false, true)
@@ -493,10 +493,13 @@ local espCache = { }
 local function destroy(self)
     self = self.Self or self
 
-    ESPs[self.Settings.Class][self.Object] = nil
+    if self.Object then
+        ESPs[self.Settings.Class][self.Object] = nil
+        espCache[self.Object] = nil
+    end
+    
     self.ESP:Destroy()
     self.Line:Destroy()
-    espCache[self.Object] = nil
 
     for i in self do
         rawset(self, i, nil)
@@ -603,43 +606,39 @@ end, __newindex = function(self, idx, val)
     refresh(self)
 end }
 
-local destroyCover = function(self)
-	return self.Settings:Destroy()
-end
-
 local function newObject(object, settings, class)
-	settings = setmetatable(settings or { }, ESPBaseSettings)
-	if class then
-		rawset(settings, "Class", class)
-	end
+    settings = setmetatable(settings or { }, ESPBaseSettings)
+    if class then
+        rawset(settings, "Class", class)
+    end
 
-	rawset(settings, "Settings", settings)
+    rawset(settings, "Settings", settings)
 
-	local v = espCache[object]
-	if v then
-		ESPs[v.Settings.Class][object] = nil
-		ESPs[settings.Class][object] = v
-		rawset(v, "Settings", settings)
+    local v = espCache[object]
+    if v then
+        ESPs[v.Settings.Class][object] = nil
+        ESPs[settings.Class][object] = v
+        rawset(v, "Settings", settings)
 
-		refresh(v)
-		return v
-	end
+        refresh(v)
+        return v
+    end
 
-	local espObj = ESPObj:Clone()
-	espObj.Parent = holder
+    local espObj = ESPObj:Clone()
+    espObj.Parent = holder
 
-	local tracerLine = newLine()
-	updateLine(tracerLine, false)
+    local tracerLine = newLine()
+    updateLine(tracerLine, false)
 
-	v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine, Destroy = destroyCover }, objectBase)
-	rawset(settings, "Self", v)
+    v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine, Destroy = destroy }, objectBase)
+    rawset(settings, "Self", v)
 
-	ESPs[settings.Class] = ESPs[settings.Class] or { }
-	ESPs[settings.Class][object] = v
-	espCache[object] = v
+    ESPs[settings.Class] = ESPs[settings.Class] or { }
+    ESPs[settings.Class][object] = v
+    espCache[object] = v
 
-	refresh(v)
-	return v
+    refresh(v)
+    return v
 end
 
 base.new = newObject

@@ -30,13 +30,13 @@ local connectionBase = {
 		if self.Connected then
 			rawset(self, "Connected", false)
 			freeze(self)
-			
+
 			self.Parent:Cleanup()
 		end
 	end,
 	Fire = function(self, ...)
 		self.Parent:Cleanup()
-		
+
 		if not self.Enabled or not self.Connected or not self.Parent.Enabled then return end
 		spawn(self.Callback, ...)
 	end
@@ -47,7 +47,7 @@ local eventBase = {
 	Connect = function(self, func)
 		local connection = smt({ Callback = func, Connected = true, Enabled = true, Parent = self }, connectionBase)
 		insert(self._Connections, connection)
-		
+
 		self:Cleanup()
 		return connection
 	end,
@@ -71,35 +71,37 @@ local eventBase = {
 
 		repeat quickEvent:Wait() until result
 		self:Cleanup()
-		
+
 		return unpack(result, 1, result.n)
 	end,
 	Cleanup = function(self) -- usually not needed to be called manually
 		local cons = self._Connections
 		local i = 1
-		
+
 		while i <= #cons do
-			if not cons[i].Connected then
+			if not cons[i] or cons[i].Connected then
 				remove(cons, i)
 			else
 				i += 1
 			end
 		end
 	end,
-	
+
 	Fire = function(self, ...)
 		self:Cleanup()
-		
+
 		local cons = self._Connections
 		for i = 1, #cons do
-			cons[i]:Fire(...)
+			if cons[i] then
+				cons[i]:Fire(...)
+			end
 		end
 	end,
 	DisconnectAll = function(self)
 		for i, v in self._Connections do
 			v:Disconnect()
 		end
-		
+
 		self:Cleanup()
 	end
 }
@@ -114,27 +116,27 @@ local lib = setmetatable({
 		if typeof(events[1]) == "table" then
 			events = events[1]
 		end
-		
+
 		if #events == 0 then return end
 		if #events == 1 then return events[1]:Wait() end
-		
+
 		local result, winner
 		local connections = { }
-		
+
 		for i, v in events do
 			connections[#connections + 1] = v:Once(function(...)
 				for i, v in connections do
 					v:Disconnect()
 				end
-				
+
 				winner = v
 				result = pack(...)
 				quick:Fire()
 			end)
 		end
-		
+
 		repeat quickEvent:Wait() until result
-		
+
 		insert(result, 1, winner)
 		return unpack(result, 1, result.n + 1)
 	end
@@ -153,17 +155,17 @@ clock:Connect(function(isDefer, dontFire)
 	local current = tick()
 	fakeClock:Fire(current - last, isDefer)
 	last = current
-	
+
 	if dontFire then return end
-	
+
 	race(clock, r1, r2, r3)
 	fire(clock, false, false)
 	delay(0, fire, clock, false, true)
-	
+
 	for i = 1, maxDefer do
 		defer(fire, deferClock)
 		deferClock:Wait()
-		
+
 		if i <= 3 or i == 10 or i == maxDefer then
 			fire(clock, true, true)
 			delay(0, fire, clock, false, true)

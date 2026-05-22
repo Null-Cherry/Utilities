@@ -35,8 +35,6 @@ local connectionBase = {
 		end
 	end,
 	Fire = function(self, ...)
-		self.Parent:Cleanup()
-
 		if not self.Enabled or not self.Connected or not self.Parent.Enabled then return end
 		spawn(self.Callback, ...)
 	end
@@ -48,7 +46,6 @@ local eventBase = {
 		local connection = smt({ Callback = func, Connected = true, Enabled = true, Parent = self }, connectionBase)
 		insert(self._Connections, connection)
 
-		self:Cleanup()
 		return connection
 	end,
 	Once = function(self, func)
@@ -59,7 +56,6 @@ local eventBase = {
 			func(...)
 		end)
 
-		self:Cleanup()
 		return con
 	end,
 	Wait = function(self)
@@ -70,17 +66,16 @@ local eventBase = {
 		end)
 
 		repeat quickEvent:Wait() until result
-		self:Cleanup()
-
 		return unpack(result, 1, result.n)
 	end,
 	Cleanup = function(self) -- usually not needed to be called manually
 		local cons = self._Connections
-		local i = 1
+		local i, ln = 1, #cons
 
-		while i <= #cons do
-			if not cons[i] or cons[i].Connected then
+		while i <= ln do
+			if not cons[i] or not cons[i].Connected then
 				remove(cons, i)
+				ln -= 1
 			else
 				i += 1
 			end
@@ -101,8 +96,6 @@ local eventBase = {
 		for i, v in self._Connections do
 			v:Disconnect()
 		end
-
-		self:Cleanup()
 	end
 }
 

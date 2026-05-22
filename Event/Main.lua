@@ -35,6 +35,8 @@ local connectionBase = {
 		end
 	end,
 	Fire = function(self, ...)
+		self.Parent:Cleanup()
+		
 		if not self.Enabled or not self.Connected or not self.Parent.Enabled then return end
 		spawn(self.Callback, ...)
 	end
@@ -47,7 +49,6 @@ local eventBase = {
 		insert(self._Connections, connection)
 		
 		self:Cleanup()
-
 		return connection
 	end,
 	Once = function(self, func)
@@ -58,6 +59,7 @@ local eventBase = {
 			func(...)
 		end)
 
+		self:Cleanup()
 		return con
 	end,
 	Wait = function(self)
@@ -68,6 +70,8 @@ local eventBase = {
 		end)
 
 		repeat quickEvent:Wait() until result
+		self:Cleanup()
+		
 		return unpack(result, 1, result.n)
 	end,
 	Cleanup = function(self) -- usually not needed to be called manually
@@ -84,6 +88,8 @@ local eventBase = {
 	end,
 	
 	Fire = function(self, ...)
+		self:Cleanup()
+		
 		local cons = self._Connections
 		for i = 1, #cons do
 			cons[i]:Fire(...)

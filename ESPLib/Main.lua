@@ -548,6 +548,10 @@ refresh = function(self)
     local settings = self.Settings
     local obj = self.Object
     local line = self.Line
+    
+    if not obj or not obj:IsDescendantOf(workspace) then
+        return destroy(self)
+    end
 
     local highlight = esp.Highlight
 
@@ -644,12 +648,7 @@ local function newObject(object, settings, class)
     ESPs[settings.Class] = ESPs[settings.Class] or { }
     ESPs[settings.Class][object] = v
     espCache[object] = v
-    object.Destroying:Connect(function()
-        if v.Settings then
-            destroy(v.Settings)
-        end
-    end)
-
+    
     refresh(v)
     return v
 end

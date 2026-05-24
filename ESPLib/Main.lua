@@ -345,6 +345,17 @@ local drawing = env.Drawing or env.drawing
 local fromPoint = v2(0, 0)
 local maxX, maxY = 0, 0
 
+local guiServ = game:GetService("GuiService")
+local opened = guiServ.MenuIsOpen
+
+guiServ.MenuOpened:Connect(function()
+    opened = true
+end)
+
+guiServ.MenuClosed:Connect(function()
+    opened = false
+end)
+
 local function memoize(fn)
     local cache = setmetatable({ }, { __mode = "k" })
 
@@ -587,7 +598,7 @@ refresh = function(self)
     topText.TextColor3 = color
 
     local tracerEnabled = settings.Tracer or base.Tracers and base.ClassSettings[settings.Class].Tracers
-    if not tracerEnabled then
+    if opened or not tracerEnabled then
         return updateLine(line, false)
     end
     

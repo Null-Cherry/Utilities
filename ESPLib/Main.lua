@@ -510,7 +510,7 @@ end)
 local espCache = { }
 local function destroy(self)
     self = self.Self or self
-    if not self.ESP then return end
+    if self.Destroyed then return end
 
     if self.Object then
         ESPs[self.Settings.Class][self.Object] = nil
@@ -519,10 +519,10 @@ local function destroy(self)
     
     self.ESP:Destroy()
     self.Line:Destroy()
-
-    for i in self do
-        rawset(self, i, nil)
-    end
+    
+    rawset(self, "Destroyed", true)
+    rawset(self, "ESP", nil)
+    rawset(self, "Line", nil)
 end
 
 local function getVector2(pos)
@@ -554,6 +554,8 @@ end
 
 refresh = function(self)
     self = self.Self or self
+    
+    if self.Destroyed then return end
 
     local esp = self.ESP
     local settings = self.Settings

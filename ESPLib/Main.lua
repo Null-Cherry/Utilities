@@ -246,7 +246,7 @@ local lib = setmetatable({
                     v:Disconnect()
                 end
 
-                winner = v
+                winner = i
                 result = pack(...)
                 quick:Fire()
             end)
@@ -256,6 +256,18 @@ local lib = setmetatable({
 
         insert(result, 1, winner)
         return unpack(result, 1, result.n + 1)
+    end,
+    RaceEventsWithTimeout = function(self, events, timeout)
+        local timeoutEvent = self.new()
+        events[#events + 1] = timeoutEvent
+
+        delay(timeout, timeoutEvent.Fire, timeoutEvent)
+
+        local racing = pack(self:RaceEvents(events))
+        local winner = remove(racing, 1)
+        racing.n -= 1
+
+        return winner ~= #events, racing
     end
 }, freeze({ __call = function(self, ...) return self.new(...) end }))
 global[n] = lib
@@ -285,7 +297,6 @@ clock:Connect(function(isDefer, dontFire)
 
         if i <= 3 or i == 10 or i == maxDefer then
             fire(clock, true, true)
-            delay(0, fire, clock, false, true)
         end
     end
 end)
@@ -331,12 +342,15 @@ local setmetatable = setmetatable
 local tick = tick
 local v2 = Vector2.new
 local hsv = Color3.fromHSV
+local c3n = Color3.new
 local typeof = typeof
 local concat = table.concat
 local pack, unpack = table.pack, table.unpack
 local pcall = pcall
 local u2 = UDim2.new
 local v3 = Vector3.new
+local round = math.round
+local clamp = math.clamp
 
 local plr = game:GetService("Players").LocalPlayer
 local mouse = plr:GetMouse()
@@ -449,11 +463,14 @@ onUpdate = { __newindex = onUpdate }
 local ev = event.new()
 local base = {
     RGBSpeed = 1,
+    RGBWhite = 0, -- 0-1
     RGB = false,
     Tracers = true,
     FromPoint = "Bottom",
     Performant = false,
+    ShowDistance = false,
     Event = ev,
+    DistanceGradient = { 100, c3n(1, 0.4, 0.4), c3n(0.4, 1, 0.4) },
     ClassSettings = setmetatable({ }, {
         __index = function(self, idx)
             local tbl = rawget(self, idx)
@@ -465,7 +482,9 @@ local base = {
                     RGB = false,
                     Objects = ESPs[idx],
                     Visible = false,
-                    Changed = event.new()
+                    Changed = event.new(),
+                    Color = c3n(1, 1, 1),
+                    ShowDistance = false,
                 }, onUpdate)
 
                 rawset(self, idx, tbl)
@@ -480,13 +499,14 @@ local base = {
 
 local cam = workspace.CurrentCamera
 local f = 50
+local myPos = cam and cam.CFrame or CFrame.new()
 
 game:GetService("RunService").RenderStepped:Connect(function()
     local currentTick = tick()
     time += (currentTick - lastTick) * base.RGBSpeed
     lastTick = currentTick
     
-    currentRGBColor = hsv(time % 1, 1, 1)
+    currentRGBColor = hsv(time % 1, 1, 1):Lerp(c3n(1, 1, 1), base.RGBWhite)
     cam = workspace.CurrentCamera or cam.Parent == workspace and cam or nil
     
     maxX = (cam and cam.ViewportSize.X or topb.AbsoluteSize.X) + f
@@ -494,11 +514,24 @@ game:GetService("RunService").RenderStepped:Connect(function()
 
     if base.FromPoint == "Bottom" then
         fromPoint = cam and v2(cam.ViewportSize.X / 2, cam.ViewportSize.Y - topb.AbsoluteSize.Y) or v2(0, 0)
+    elseif base.FromPoint == "Top" then
+        fromPoint = cam and v2(cam.ViewportSize.X / 2, -topb.AbsoluteSize.Y) or v2(0, 0)
+    elseif base.FromPoint == "Center" then
+        fromPoint = cam and v2(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2 - topb.AbsoluteSize.Y) or v2(0, 0)
     elseif typeof(base.FromPoint) == "Vector2" then
-        fromPoint = base.FromPoint
+        if base.FromPoint.X <= 1 and base.FromPoint.Y <= 1 and (round(base.FromPoint.X) ~= base.FromPoint.X or base.FromPoint.X % 1 == 0) and (round(base.FromPoint.Y) ~= base.FromPoint.Y or base.FromPoint.Y % 1 == 0) then
+            fromPoint = v2(base.FromPoint.X * cam.ViewportSize.X, base.FromPoint.Y * cam.ViewportSize.Y - topb.AbsoluteSize.Y)
+        else
+            fromPoint = base.FromPoint - v2(0, topb.AbsoluteSize.Y)
+        end
+    elseif typeof(base.FromPoint) == "UDim2" then
+        local u = base.FromPoint
+        fromPoint = cam and v2(u.X.Scale * cam.ViewportSize.X + u.X.Offset, u.Y.Scale * cam.ViewportSize.Y + u.Y.Offset - topb.AbsoluteSize.Y) or v2(0, 0)
     else
         fromPoint = v2(mouse.X, mouse.Y)
     end
+
+    myPos = plr and plr.Character and plr.Character:GetPivot() or cam and cam.CFrame or myPos
 
     for _, v in ESPs do
         for _, v2 in v do
@@ -519,9 +552,11 @@ local function destroy(self)
     
     self.ESP:Destroy()
     self.Line:Destroy()
+    self.Connection:Disconnect()
     
     rawset(self, "Destroyed", true)
     rawset(self, "ESP", nil)
+    rawset(self, "Connection", nil)
     rawset(self, "Line", nil)
 end
 
@@ -547,9 +582,15 @@ local getPosition; getPosition = function(obj)
         end
         
         return pos / total
+    elseif obj:IsA("Camera") then
+        return obj.CFrame.Position
     end
     
     return obj:GetPivot(obj).Position
+end
+
+local function paintRichText(text, color3)
+    return "<font color=\"#" .. color3:ToHex() .. "\">" .. text .. "</font>"
 end
 
 refresh = function(self)
@@ -562,16 +603,23 @@ refresh = function(self)
     local obj = self.Object
     local line = self.Line
     
-    if not obj or not obj:IsDescendantOf(workspace) then
+    if not obj then
         return destroy(self)
     end
 
     local highlight = esp.Highlight
+    if not obj:IsDescendantOf(workspace) then
+        esp.Enabled = false
+        highlight.Enabled = false
+        return updateLine(line, false)
+    end
 
     local pos = getPosition(obj)
     local vec = getVector2(pos)
-    
-    local visible = vec and settings.Visible and base.ClassSettings[settings.Class].Visible
+
+    local class = settings.Class
+    local classSettings = base.ClassSettings[class]
+    local visible = vec and settings.Visible and classSettings.Visible
 
     esp.Enabled = visible
     highlight.Enabled = visible and settings.Highlight
@@ -583,7 +631,7 @@ refresh = function(self)
     local text = esp.TextLabel
     local topText = esp.TopTextLabel
 
-    local color = (settings.RGB or base.RGB or base.ClassSettings[settings.Class].RGB) and currentRGBColor or settings.Color
+    local color = (settings.RGB or base.RGB or classSettings.RGB) and currentRGBColor or settings.Color or classSettings.Color
 
     esp.Circle.BackgroundColor3 = color
     esp.StudsOffsetWorldSpace = pos
@@ -595,11 +643,24 @@ refresh = function(self)
 
     text.Text = settings.Text
     text.TextColor3 = color
+    
+    local afterText = ""
+    if settings.ShowDistance or classSettings.ShowDistance and base.ShowDistance then
+        local target = plr and plr.Character or cam
+        local dist = 0
+        
+        if target then
+            dist = (getPosition(target) - pos).Magnitude
+        end
+        
+        local gradient = settings.DistanceGradient or classSettings.DistanceGradient or base.DistanceGradient
+        afterText = paintRichText("[ " .. (dist >= 10 and round(dist) or ("%.1f"):format(dist)) .. " ]", gradient[2]:Lerp(gradient[3], clamp(dist / gradient[1], 0, 1)))
+    end
 
-    topText.Text = settings.TopText
+    topText.Text = settings.TopText .. "\n" .. afterText
     topText.TextColor3 = color
 
-    local tracerEnabled = settings.Tracer or base.Tracers and base.ClassSettings[settings.Class].Tracers
+    local tracerEnabled = settings.Tracer or classSettings.Tracers and base.Tracers
     if opened or not tracerEnabled then
         return updateLine(line, false)
     end
@@ -614,8 +675,8 @@ local ESPBaseSettings = {
     Text = "",
     TopText = "",
     Visible = true,
+    ShowDistance = false,
     RGB = false,
-    Color = Color3.new(1, 1, 1),
     Class = "_Default",
 
     Refresh = refresh,
@@ -655,7 +716,10 @@ local function newObject(object, settings, class)
     local tracerLine = newLine()
     updateLine(tracerLine, false)
 
-    v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine, Destroy = destroy }, objectBase)
+    v = setmetatable({ Object = object, Settings = settings, ESP = espObj, Line = tracerLine, Destroy = destroy, Connection = object.Destroying:Connect(function()
+        v:Destroy()
+    end) }, objectBase)
+    
     rawset(settings, "Self", v)
 
     ESPs[settings.Class] = ESPs[settings.Class] or { }
@@ -676,4 +740,3 @@ end;
 -- YOUR CODE DOWN HERE --
 
 local obj = objects["Instance0"];
-return require(obj)

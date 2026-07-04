@@ -122,7 +122,7 @@ local lib = setmetatable({
 					v:Disconnect()
 				end
 
-				winner = v
+				winner = i
 				result = pack(...)
 				quick:Fire()
 			end)
@@ -132,6 +132,18 @@ local lib = setmetatable({
 
 		insert(result, 1, winner)
 		return unpack(result, 1, result.n + 1)
+	end,
+	RaceEventsWithTimeout = function(self, events, timeout)
+		local timeoutEvent = self.new()
+		events[#events + 1] = timeoutEvent
+
+		delay(timeout, timeoutEvent.Fire, timeoutEvent)
+
+		local racing = pack(self:RaceEvents(events))
+		local winner = remove(racing, 1)
+		racing.n -= 1
+
+		return winner ~= #events, racing
 	end
 }, freeze({ __call = function(self, ...) return self.new(...) end }))
 global[n] = lib
@@ -161,7 +173,6 @@ clock:Connect(function(isDefer, dontFire)
 
 		if i <= 3 or i == 10 or i == maxDefer then
 			fire(clock, true, true)
-			delay(0, fire, clock, false, true)
 		end
 	end
 end)

@@ -5,7 +5,9 @@ local utils = {
 	Physics = "Util",
 	Typer = "Util",
 	Desync = "Url",
-	UI = "Url"	
+	UI = "Url",
+	NullFireWindow = "Url",
+	FunkyFridayAutoPlay = "Url"
 }
 
 local utilGlobalKeys = {
@@ -14,7 +16,26 @@ local utilGlobalKeys = {
 	Event = "EventLib1",
 	Physics = "PhyLib",
 	Desync = "DesyncLib",
-	UI = "FireLibrary"
+	UI = "FireLibrary",
+	NullFireWindow = "NFWINDOW",
+	FunkyFridayAutoPlay = "FFAutoplayLib"
+}
+
+local ext = ".lua"
+local user = "https://raw.githubusercontent.com/Null-Cherry/"
+local subUrls = {
+	Util = user .. "Utilities/refs/heads/main/"
+}
+
+local urls = {
+	UI = user .. "Fire-Library/refs/heads/main/QuickLoader" .. ext,
+	Desync = subUrls.Util .. "Physics/Desync" .. ext,
+	NullFireWindow = user .. "Null-Fire/refs/heads/main/Core/Libraries/Window/Main" .. ext,
+	FunkyFridayAutoPlay = user .. "Null-Fire/refs/heads/main/Core/Loaders/Funky-Friday/Autoplay" .. ext
+}
+
+local shortcuts = {
+	ESP = "ESPLib"
 }
 
 local global = getgenv and getgenv() or _G
@@ -25,15 +46,9 @@ if global[globalKey] then
 end
 
 local coreFolder = "QUtil/"
-local ext = ".lua"
 local utilFile = coreFolder .. "Utility" .. ext
 local utilVerCheckFile = coreFolder .. "VCheck.txt"
 local utilsFolder = coreFolder .. "Utilities/"
-
-local user = "https://raw.githubusercontent.com/Null-Cherry/"
-local subUrls = {
-	Util = user .. "Utilities/refs/heads/main/"
-}
 
 local ver = "1.0"
 local wf, rf, mf, IF, df, DF = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder, deletefile or delfile or removefile or delete_file or del_fire or remove_file
@@ -82,15 +97,6 @@ end
 if global[globalKey] then
 	return global[globalKey]
 end
-
-local urls = {
-	UI = user .. "Fire-Library/refs/heads/main/QuickLoader" .. ext,
-	Desync = subUrls.Util .. "Physics/Desync" .. ext
-}
-
-local shortcuts = {
-	ESP = "ESPLib"
-}
 
 local function tableSearch(key, table)
 	for k, v in table do

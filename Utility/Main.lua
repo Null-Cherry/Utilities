@@ -37,6 +37,7 @@ local subUrls = {
 local ver = "1.0"
 local wf, rf, mf, IF, df = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder
 local loadstring, tonumber, game, error, warn, freeze, spawn, pcall = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn, pcall
+local utilityPrefix = "-- This is the main utility loader. Its used for quickly loading without needing to be downloaded\n"
 
 if wf and rf and mf and IF then
 	local serverVer = game:HttpGet(subUrls.Util .. "Utility/Version.txt", true):gsub("[\n\r\f\t\s\0 ]", "")
@@ -48,7 +49,7 @@ if wf and rf and mf and IF then
 			pcall(df, coreFolder:sub(1, -2))
 			mf(coreFolder:sub(1, -2))
 			mf(utilsFolder:sub(1, -2))
-			wf(utilFile, self)
+			wf(utilFile, utilityPrefix .. self)
 			
 			return loadTest()
 		else
@@ -64,7 +65,7 @@ if wf and rf and mf and IF then
 		if loadstring(self) then
 			mf(coreFolder:sub(1, -2))
 			mf(utilsFolder:sub(1, -2))
-			wf(utilFile, self)
+			wf(utilFile, utilityPrefix .. self)
 		end
 	end)
 	
@@ -145,7 +146,7 @@ local downloadModule; function downloadModule(name, forceDownload)
 	local loadTest = loadstring(moduleContents)
 
 	if loadTest then
-		wf(filePath, moduleContents)
+		wf(filePath, "-- " .. moduleName .. "\n" .. moduleContents)
 		return loadTest
 	else
 		error("Module failed to load: " .. moduleContents, 0)

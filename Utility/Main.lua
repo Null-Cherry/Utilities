@@ -124,35 +124,40 @@ local function hash(str)
 end
 
 local cache = { }
-local downloadModule; function downloadModule(name, forceDownload)
-	local moduleName, moduleType = getModuleInfo(name)
+
+local downloadModule
+local function try(moduleName)
 	local filePath = utilsFolder .. hash(moduleName) .. ext
-	
-	if not forceDownload then
-		local cached = cache[moduleName]
-		if cached then
-			return cached
-		end
-		
-		if IF and IF(filePath) and not forceDownload then
-			return loadstring(rf(filePath))
-		end
-		
-		local gkey = utilGlobalKeys[moduleName]
-		if gkey then
-			local found = global[gkey]
-			if found then
-				spawn(downloadModule, true)
-				return found
-			end
+	local cached = cache[moduleName]
+	if cached then
+		return cached
+	end
+
+	if IF and IF(filePath) then
+		return loadstring(rf(filePath))
+	end
+
+	local gkey = utilGlobalKeys[moduleName]
+	if gkey then
+		local found = global[gkey]
+		if found then
+			spawn(downloadModule, true)
+			return found
 		end
 	end
+end
+
+function downloadModule(name, forceDownload)
+	local moduleName, moduleType = getModuleInfo(name)
 	
+	if not forceDownload then local ret = try() if ret then return ret end end
 	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext, true)
+	if not forceDownload then local ret = try() if ret then return ret end end
+	
 	local loadTest = loadstring(moduleContents)
 
 	if loadTest then
-		wf(filePath, "-- " .. moduleName .. "\n" .. moduleContents)
+		wf(utilsFolder .. hash(moduleName) .. ext, "-- " .. moduleName .. "\n" .. moduleContents)
 		return loadTest
 	else
 		error("Module failed to load: " .. moduleContents, 0)

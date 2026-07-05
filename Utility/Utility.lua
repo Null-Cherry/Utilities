@@ -8,6 +8,13 @@ local utils = {
 	UI = "Url"	
 }
 
+local global = getgenv and getgenv() or _G
+local globalKey = "QKUtil"
+
+if global[globalKey] then
+	return global[globalKey]
+end
+
 local coreFolder = "QUtil/"
 local ext = ".lua"
 local utilFile = coreFolder .. "Utility" .. ext
@@ -45,6 +52,10 @@ if wf and rf and mf and IF then
 	
 	mf(coreFolder:sub(1, -2))
 	mf(utilsFolder:sub(1, -2))
+end
+
+if global[globalKey] then
+	return global[globalKey]
 end
 
 local urls = {
@@ -117,13 +128,15 @@ for module in utils do
 end
 
 freeze(modules)
+
+local defer = task.defer
 spawn(function()
 	for i, module in modules do
-		spawn(downloadModule, module)
+		defer(downloadModule, module)
 	end
 end)
 
-return setmetatable({
+local util = setmetatable({
 	Load = function(self, name)if not self.Modules then error("Call via ':' next time!", 0) end return downloadModule(name)() end,
 	LoadModule = function(self, ...) return self:Load(...) end,
 	Modules = modules,
@@ -134,3 +147,8 @@ return setmetatable({
 	__newindex = error,
 	__metatable = getmetatable(game)
 }))
+
+global[globalKey] = util
+
+task.wait()
+return util

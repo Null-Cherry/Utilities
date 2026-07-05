@@ -75,7 +75,13 @@ local function urlLoad(url)
 end
 
 
-local event = urlLoad("https://raw.githubusercontent.com/Null-Cherry/Utilities/refs/heads/main/Event/Main.lua")
+local util = (getfenv().getgenv or function() return _G end)().QKUtil or (function() local rf, IF = getfenv().readfile or getfenv().read_file, getfenv().isfile or getfenv().is_file return loadstring(rf and IF and IF("QUtil/Utility.lua") and rf("QUtil/Utility.lua") or game:HttpGet("https://raw.githubusercontent.com/Null-Cherry/Utilities/refs/heads/main/Utility/Main.lua"))() end)()
+
+if g[libN] then
+	return g[libN]
+end
+
+local event = util:Event()
 local beforeSpoofing, afterSpoofing, afterSpoofCycle = event.new(), event.new(), event.new()
 
 local function fr()

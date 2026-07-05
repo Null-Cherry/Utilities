@@ -35,46 +35,6 @@ local cfz = ncf()
 
 local ino = getfenv().isnetworkowner
 local ghp = getfenv().gethiddenproperty
-local request = getfenv().request
-
-local function gHTTPG(url)
-	return game:HttpGet(url)
-end
-
-local function httpGet(url)
-	if request then
-		local result = request({ Url = url, Method = "GET", Headers = { } })
-		local success = result.Success or tostring(result.StatusCode):sub(1, 1) == "2"
-		return success and result.Body or "", success
-	else
-		local s, e = pcall(gHTTPG, url)
-		return s and e or "", s
-	end
-end
-
-local function urlLoad(url)
-	local ret
-	while true do
-		ret = nil
-
-		local r, s = httpGet(url)
-		if s then
-			ret = loadstring(r)
-
-			if ret then
-				ret = ret()
-
-				if ret then
-					break
-				end
-			end
-		end
-	end
-
-	return ret
-end
-
-
 local util = (getfenv().getgenv or function() return _G end)().QKUtil or (function() local rf, IF = getfenv().readfile or getfenv().read_file, getfenv().isfile or getfenv().is_file return loadstring(rf and IF and IF("QUtil/Utility.lua") and rf("QUtil/Utility.lua") or game:HttpGet("https://raw.githubusercontent.com/Null-Cherry/Utilities/refs/heads/main/Utility/Main.lua"))() end)()
 
 if g[libN] then

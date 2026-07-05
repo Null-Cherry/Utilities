@@ -27,6 +27,7 @@ end
 local coreFolder = "QUtil/"
 local ext = ".lua"
 local utilFile = coreFolder .. "Utility" .. ext
+local utilVerCheckFile = coreFolder .. "Utility/VCheck.txt"
 local utilsFolder = coreFolder .. "Utilities/"
 
 local user = "https://raw.githubusercontent.com/Null-Cherry/"
@@ -35,21 +36,24 @@ local subUrls = {
 }
 
 local ver = "1.0"
-local wf, rf, mf, IF, df = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder
-local loadstring, tonumber, game, error, warn, freeze, spawn, pcall = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn, pcall
+local wf, rf, mf, IF, df, DF = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder, deletefile or delfile or removefile or delete_file or del_fire or remove_file
+local loadstring, tonumber, game, error, warn, freeze, spawn, pcall, tick, tostring = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn, pcall, tick, tostring
 local utilityPrefix = "-- This is the main utility loader. Its used for quickly loading without needing to be downloaded\n"
 
-if wf and rf and mf and IF then
-	local serverVer = game:HttpGet(subUrls.Util .. "Utility/Version.txt", true):gsub("[\n\r\f\t\s\0 ]", "")
+if wf and rf and mf and df and IF and DF then
+	local serverVer = IF(utilVerCheckFile) and tick() - tonumber(rf(utilVerCheckFile)) > 10800 game:HttpGet(subUrls.Util .. "Utility/Version.txt", true):gsub("[\n\r\f\t\s\0 ]", "")
 	if tonumber(serverVer) and ver ~= serverVer then
 		local self = game:HttpGet(subUrls.Util .. "Utility/Main" .. ext, true)
 		local loadTest = loadstring(self)
 		
 		if loadTest then
 			pcall(df, coreFolder:sub(1, -2))
+			pcall(DF, "FireLibrary/Library.lua") -- force UI library to update
+			
 			mf(coreFolder:sub(1, -2))
 			mf(utilsFolder:sub(1, -2))
 			wf(utilFile, utilityPrefix .. self)
+			wf(utilVerCheckFile, tostring(tick()))
 			
 			return loadTest()
 		else
@@ -66,6 +70,7 @@ if wf and rf and mf and IF then
 			mf(coreFolder:sub(1, -2))
 			mf(utilsFolder:sub(1, -2))
 			wf(utilFile, utilityPrefix .. self)
+			wf(utilVerCheckFile, tostring(tick()))
 		end
 	end)
 	

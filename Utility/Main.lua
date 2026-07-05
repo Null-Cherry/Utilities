@@ -36,16 +36,16 @@ local subUrls = {
 
 local ver = "1.0"
 local wf, rf, mf, IF, df = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder
-local loadstring, tonumber, game, error, warn, freeze, spawn = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn
+local loadstring, tonumber, game, error, warn, freeze, spawn, pcall = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn, pcall
 
 if wf and rf and mf and IF then
-	local serverVer = game:HttpGet(subUrls.Util .. "Utility/Version.txt"):gsub("\n\r\f\t\s\0 ", "")
+	local serverVer = game:HttpGet(subUrls.Util .. "Utility/Version.txt", true):gsub("[\n\r\f\t\s\0 ]", "")
 	if tonumber(serverVer) and ver ~= serverVer then
-		local self = game:HttpGet(subUrls.Util .. "Utility/Main")
+		local self = game:HttpGet(subUrls.Util .. "Utility/Main" .. ext, true)
 		local loadTest = loadstring(self)
 		
 		if loadTest then
-			df(coreFolder:sub(1, -2))
+			pcall(df, coreFolder:sub(1, -2))
 			mf(coreFolder:sub(1, -2))
 			mf(utilsFolder:sub(1, -2))
 			wf(utilFile, self)
@@ -58,6 +58,15 @@ if wf and rf and mf and IF then
 		warn("Failed to get version for Utility: " .. serverVer)
 		warn("The script using that utility might work incorrectly or not at all")
 	end
+
+	spawn(function()
+		local self = game:HttpGet(subUrls.Util .. "Utility/Main" .. ext, true)
+		if loadstring(self) then
+			mf(coreFolder:sub(1, -2))
+			mf(utilsFolder:sub(1, -2))
+			wf(utilFile, self)
+		end
+	end)
 	
 	mf(coreFolder:sub(1, -2))
 	mf(utilsFolder:sub(1, -2))
@@ -110,7 +119,7 @@ end
 local cache = { }
 local downloadModule; function downloadModule(name, forceDownload)
 	local moduleName, moduleType = getModuleInfo(name)
-	local filePath = hash(utilsFolder .. moduleName) .. ext
+	local filePath = utilsFolder .. hash(moduleName) .. ext
 	
 	if not forceDownload then
 		local cached = cache[moduleName]
@@ -132,7 +141,7 @@ local downloadModule; function downloadModule(name, forceDownload)
 		end
 	end
 	
-	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext)
+	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext, true)
 	local loadTest = loadstring(moduleContents)
 
 	if loadTest then
@@ -153,7 +162,10 @@ freeze(modules)
 local defer = task.defer
 spawn(function()
 	for i, module in modules do
-		defer(downloadModule, module, true)
+		defer(function()
+			pcall(downloadModule, module, true)
+			pcall(downloadModule, module)
+		end)
 	end
 end)
 

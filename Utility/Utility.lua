@@ -8,6 +8,15 @@ local utils = {
 	UI = "Url"	
 }
 
+local utilGlobalKeys = {
+	Data = "DataLibrary",
+	ESPLib = "FESPLib",
+	Event = "EventLib1",
+	Physics = "PhyLib",
+	Desync = "DesyncLib",
+	UI = "FireLibrary"
+}
+
 local global = getgenv and getgenv() or _G
 local globalKey = "QKUtil"
 
@@ -99,16 +108,28 @@ local function hash(str)
 end
 
 local cache = { }
-local function downloadModule(name)
+local downloadModule; function downloadModule(name, forceDownload)
 	local moduleName, moduleType = getModuleInfo(name)
-	local cached = cache[moduleName]
-	if cached then
-		return cached
-	end
-	
 	local filePath = hash(utilsFolder .. moduleName) .. ext
-	if IF and IF(filePath) then
-		return loadstring(rf(filePath))
+	
+	if not forceDownload then
+		local cached = cache[moduleName]
+		if cached then
+			return cached
+		end
+		
+		if IF and IF(filePath) and not forceDownload then
+			return loadstring(rf(filePath))
+		end
+		
+		local gkey = utilGlobalKeys[moduleName]
+		if gkey then
+			local found = global[gkey]
+			if found then
+				spawn(downloadModule, true)
+				return found
+			end
+		end
 	end
 	
 	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext)
@@ -132,7 +153,7 @@ freeze(modules)
 local defer = task.defer
 spawn(function()
 	for i, module in modules do
-		defer(downloadModule, module)
+		defer(downloadModule, module, true)
 	end
 end)
 

@@ -176,14 +176,24 @@ spawn(function()
 	end
 end)
 
+local returnCache = { }
 local util = setmetatable({
-	Load = function(self, name)if not self.Modules then error("Call via ':' next time!", 0) end return downloadModule(name)() end,
+	Load = function(self, name) if not self.Modules then error("Call via ':' next time!", 0) end return downloadModule(name)() end,
 	LoadModule = function(self, ...) return self:Load(...) end,
 	Modules = modules,
 	Utililites = modules,
 	Utils = modules
 }, freeze({
-	__index = function(self, name) return downloadModule(name) end,
+	__index = function(_, name)
+		local safeName = name:gsub("[\n\r\f\t\s\0 ]", ""):lower()
+		local c = returnCache[safeName]
+		if c then return c end
+		
+		local retF = function(self) return self:Load(name) end
+		returnCache[safeName] = retF
+		
+		return retF
+	end,
 	__newindex = error,
 	__metatable = getmetatable(game)
 }))

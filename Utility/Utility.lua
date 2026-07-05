@@ -41,7 +41,7 @@ local loadstring, tonumber, game, error, warn, freeze, spawn = loadstring or loa
 if wf and rf and mf and IF then
 	local serverVer = game:HttpGet(subUrls.Util .. "Utility/Version.txt"):gsub("\n\r\f\t\s\0 ", "")
 	if tonumber(serverVer) and ver ~= serverVer then
-		local self = game:HttpGet(subUrls .. "Utility/Main")
+		local self = game:HttpGet(subUrls.Util .. "Utility/Main")
 		local loadTest = loadstring(self)
 		
 		if loadTest then

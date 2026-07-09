@@ -50,7 +50,7 @@ local utilFile = coreFolder .. "Utility" .. ext
 local utilVerCheckFile = coreFolder .. "VCheck.txt"
 local utilsFolder = coreFolder .. "Utilities/"
 
-local ver = "1.01"
+local ver = "1.02"
 local wf, rf, mf, IF, df, DF = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder, deletefile or delfile or removefile or delete_file or del_fire or remove_file
 local loadstring, tonumber, game, error, warn, freeze, spawn, pcall, tick, tostring = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn, pcall, tick, tostring
 local utilityPrefix = "-- This is the main utility loader. Its used for quickly loading without needing to be downloaded\n"
@@ -64,7 +64,7 @@ if wf and rf and mf and df and IF and DF then
 		
 		if loadTest then
 			pcall(df, coreFolder:sub(1, -2))
-			pcall(DF, "FireLibrary/Library.lua") -- force UI library to update
+			pcall(DF, "FireLibrary/Library" .. ext) -- force UI library to update
 			
 			mf(coreFolder:sub(1, -2))
 			mf(utilsFolder:sub(1, -2))
@@ -182,10 +182,7 @@ spawn(function()
 	for i, module in modules do
 		defer(function()
 			pcall(downloadModule, module, true)
-			local s, r = pcall(downloadModule, module)
-			if s then
-				pcall(r)
-			end
+			pcall(downloadModule, module)
 		end)
 	end
 end)

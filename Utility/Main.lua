@@ -1,4 +1,4 @@
-local ver = "1.051"
+local ver = "1.052"
 local utils = {
 	Data = "Util",
 	ESPLib = "Util",
@@ -176,7 +176,7 @@ end
 local pack, remove, unpack, wait = table.pack, table.remove, unpack or table.unpack, task and task.wait or wait
 local function bruteforceLoadModule(name)
 	while true do
-		local result = pack(downloadModule(name))
+		local result = pack(pcall(downloadModule, name)))
 		local success = remove(result, 1)
 		
 		if success then

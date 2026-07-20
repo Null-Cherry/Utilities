@@ -1,3 +1,4 @@
+local ver = "1.05"
 local utils = {
 	Data = "Util",
 	ESPLib = "Util",
@@ -50,9 +51,8 @@ local utilFile = coreFolder .. "Utility" .. ext
 local utilVerCheckFile = coreFolder .. "VCheck.txt"
 local utilsFolder = coreFolder .. "Utilities/"
 
-local ver = "1.04"
 local wf, rf, mf, IF, df, DF = writefile or write_file, readfile or read_file, makefolder or make_folder, isfile or is_file, deletefolder or delfolder or removefolder or delete_folder or del_folder or remove_folder, deletefile or delfile or removefile or delete_file or del_fire or remove_file
-local loadstring, tonumber, game, error, warn, freeze, spawn, pcall, tick, tostring = loadstring or load, tonumber, game, error, warn, table.freeze, task.spawn, pcall, tick, tostring
+local loadstring, tonumber, game, error, warn, freeze, spawn, pcall, tick, tostring = loadstring or load, tonumber, game, error, warn, table.freeze, task and task.spawn or spawn, pcall, tick, tostring
 local utilityPrefix = "-- This is the main utility loader. Its used for quickly loading without needing to be downloaded\n"
 
 if wf and rf and mf and df and IF and DF then
@@ -158,8 +158,11 @@ function downloadModule(name, forceDownload)
 	
 	if not forceDownload then local ret = try(moduleName) if ret then return ret end end
 	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext, true)
-	if not forceDownload then local ret = try(moduleName) if ret then return ret end end
+	if moduleContents:gsub("[\n\r\f\t\0 ]") == "" then
+		return downloadModule(name, true)
+	end
 	
+	if not forceDownload then local ret = try(moduleName) if ret then return ret end end
 	local loadTest = loadstring(moduleContents)
 
 	if loadTest then
@@ -167,6 +170,21 @@ function downloadModule(name, forceDownload)
 		return loadTest
 	else
 		error("Module failed to load: " .. moduleContents, 0)
+	end
+end
+
+local pack, remove, unpack, wait = table.pack, table.remove, unpack or table.unpack, task and task.wait or wait
+local function bruteforceLoadModule(name)
+	while true do
+		local result = pack(downloadModule(name))
+		local success = remove(result, 1)
+		
+		if success then
+			return unpack(result, 1, result.n - 1)
+		end
+		
+		warn("Download failed:", result[1])
+		wait()
 	end
 end
 
@@ -182,14 +200,14 @@ spawn(function()
 	for i, module in modules do
 		defer(function()
 			pcall(downloadModule, module, true)
-			pcall(downloadModule, module)
+			pcall(bruteforceLoadModule, module)
 		end)
 	end
 end)
 
 local returnCache = { }
 local util = setmetatable({
-	Load = function(self, name) if not self.Modules then error("Call via ':' next time!", 0) end return downloadModule(name)() end,
+	Load = function(self, name) if not self.Modules then error("Call via ':' next time!", 0) end return bruteforceLoadModule(name)() end,
 	LoadModule = function(self, ...) return self:Load(...) end,
 	Modules = modules,
 	Utililites = modules,
@@ -211,5 +229,5 @@ local util = setmetatable({
 
 global[globalKey] = util
 
-task.wait()
+wait()
 return util

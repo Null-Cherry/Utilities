@@ -176,7 +176,7 @@ end
 local pack, remove, unpack, wait = table.pack, table.remove, unpack or table.unpack, task and task.wait or wait
 local function bruteforceLoadModule(name)
 	while true do
-		local result = pack(pcall(downloadModule, name)))
+		local result = pack(pcall(downloadModule, name))
 		local success = remove(result, 1)
 		
 		if success then

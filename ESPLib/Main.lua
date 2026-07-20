@@ -468,7 +468,7 @@ local base = {
     Tracers = true,
     FromPoint = "Bottom",
     Performant = false,
-    ShowDistance = false,
+    ShowDistance = true,
     Event = ev,
     DistanceGradient = { 100, c3n(1, 0.4, 0.4), c3n(0.4, 1, 0.4) },
     ClassSettings = setmetatable({ }, {
@@ -494,7 +494,15 @@ local base = {
             return tbl
         end,
         __newindex = error
-    })
+    }),
+    InitClass = function(self, class, options)
+        local class = self.ClassSettings[class]
+        for i, v in options do
+            class[i] = v
+        end
+        
+        return class
+    end
 }
 
 local cam = workspace.CurrentCamera

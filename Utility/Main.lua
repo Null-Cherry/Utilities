@@ -151,13 +151,13 @@ end
 function downloadModule(name, forceDownload)
 	local moduleName, moduleType = getModuleInfo(name)
 	
-	if not forceDownload then local ret = try(moduleName) if ret then return ret end end
+	if not forceDownload then local ret = try(moduleName) if ret then return function() return ret end end end
 	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext, true)
 	if moduleContents:gsub("[\n\r\f\t\0 ]", "") == "" or #moduleContents < #utilityPrefix + 5 then
 		return downloadModule(name, true)
 	end
 	
-	if not forceDownload then local ret = try(moduleName) if ret then return ret end end
+	if not forceDownload then local ret = try(moduleName) if ret then return function() return ret end end end
 	local loadTest = loadstring(moduleContents)
 
 	if loadTest then

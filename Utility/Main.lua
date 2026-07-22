@@ -1,4 +1,3 @@
-local ver = "1.056"
 local utils = {
 	Data = "Util",
 	ESPLib = "Util",
@@ -57,8 +56,7 @@ local utilityPrefix = "-- This is the main utility loader. Its used for quickly 
 
 if wf and rf and mf and df and IF and DF then
 	local isf = IF(utilVerCheckFile)
-	local serverVer = (isf and tick() - tonumber(rf(utilVerCheckFile)) > 10800 or not isf) and game:HttpGet(subUrls.Util .. "Utility/Version.txt", true):gsub("[\n\r\f\t\s\0 ]", "") or ver
-	if tonumber(serverVer) and ver ~= serverVer then
+	if isf and tick() - tonumber(rf(utilVerCheckFile)) > 10800 or not isf then
 		local self = game:HttpGet(subUrls.Util .. "Utility/Main" .. ext, true)
 		local loadTest = loadstring(self)
 		
@@ -73,11 +71,8 @@ if wf and rf and mf and df and IF and DF then
 			
 			return loadTest()
 		else
-			error("Failed to update Utility to version " .. serverVer, 0)
+			error("Failed to update Utility", 0)
 		end
-	elseif not tonumber(serverVer) then
-		warn("Failed to get version for Utility: " .. serverVer)
-		warn("The script using that utility might work incorrectly or not at all")
 	end
 
 	spawn(function()
@@ -147,7 +142,7 @@ local function try(moduleName)
 	if gkey then
 		local found = global[gkey]
 		if found then
-			spawn(downloadModule, true)
+			spawn(downloadModule, moduleName, true)
 			return found
 		end
 	end

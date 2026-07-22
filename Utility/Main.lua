@@ -124,16 +124,9 @@ local function hash(str)
 	return ecs:ComputeStringHash(str, md5):gsub(".", _hx)
 end
 
-local cache = { }
-
 local downloadModule
-local function try(moduleName)
+local function try(moduleName, doUpdate)
 	local filePath = utilsFolder .. hash(moduleName) .. ext
-	local cached = cache[moduleName]
-	if cached then
-		return cached
-	end
-
 	if IF and IF(filePath) then
 		return loadstring(rf(filePath))
 	end
@@ -142,8 +135,11 @@ local function try(moduleName)
 	if gkey then
 		local found = global[gkey]
 		if found then
-			spawn(downloadModule, moduleName, true)
-			return found
+			if doUpdate then
+				spawn(downloadModule, moduleName, true)
+			end
+			
+			return function() return found end
 		end
 	end
 end
@@ -151,13 +147,13 @@ end
 function downloadModule(name, forceDownload)
 	local moduleName, moduleType = getModuleInfo(name)
 	
-	if not forceDownload then local ret = try(moduleName) if ret then return function() return ret end end end
+	if not forceDownload then local ret = try(moduleName, true) if ret then return ret end end
 	local moduleContents = game:HttpGet(moduleType == "Download" and moduleName or moduleType == "Url" and urls[moduleName] or subUrls[moduleType] .. moduleName .. "/Main" .. ext, true)
 	if moduleContents:gsub("[\n\r\f\t\0 ]", "") == "" or #moduleContents < #utilityPrefix + 5 then
 		return downloadModule(name, true)
 	end
 	
-	if not forceDownload then local ret = try(moduleName) if ret then return function() return ret end end end
+	if not forceDownload then local ret = try(moduleName, false) if ret then return ret end end
 	local loadTest = loadstring(moduleContents)
 
 	if loadTest then
@@ -171,14 +167,12 @@ end
 local pack, remove, unpack, wait = table.pack, table.remove, unpack or table.unpack, task and task.wait or wait
 local function bruteforceLoadModule(name)
 	while true do
-		local result = pack(pcall(downloadModule, name))
-		local success = remove(result, 1)
-		
+		local success, func = pcall(downloadModule, name)
 		if success then
-			return unpack(result, 1, result.n - 1)
+			return func
 		end
 		
-		warn("Download failed:", result[1])
+		warn("Download failed:", func)
 		wait()
 	end
 end
@@ -193,10 +187,8 @@ freeze(modules)
 local defer = task.defer
 spawn(function()
 	for i, module in modules do
-		defer(function()
-			pcall(downloadModule, module, true)
-			pcall(bruteforceLoadModule, module)
-		end)
+		pcall(downloadModule, module, true)
+		pcall(bruteforceLoadModule, module)
 	end
 end)
 
